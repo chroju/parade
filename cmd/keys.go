@@ -5,6 +5,7 @@ import (
 	"strings"
 	"github.com/spf13/cobra"
 	"github.com/chroju/para/ssmctl"
+	"github.com/fatih/color"
 )
 
 var KeysCommand = &cobra.Command{
@@ -23,8 +24,12 @@ var KeysCommand = &cobra.Command{
 		}
 
 		for _, v := range resp {
-			if strings.Contains(*v.Name, args[0]) {
-				fmt.Printf("%v\n", *v.Name)
+			key := *v.Name
+			index := strings.Index(key, args[0])
+			if index >= 0 {
+				end := index + len(args[0])
+				coloredKey := key[0:index] + color.RedString(key[index:end]) + key[end:]
+				fmt.Printf("%v\n", coloredKey)
 			}
 		}
 	},
