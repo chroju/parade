@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"github.com/chroju/para/cmd"
+	"github.com/chroju/parade/cmd"
 )
 
 func main() {

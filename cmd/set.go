@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/spf13/cobra"
-	"github.com/chroju/para/ssmctl"
+	"github.com/chroju/parade/ssmctl"
 )
 
 var (
