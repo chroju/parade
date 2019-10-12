@@ -19,18 +19,18 @@ func New() (*SSMManager, error) {
 	}, nil
 }
 
-func (s *SSMManager) GetParameters(query string) ([]*ssm.Parameter, error) {
-	params := &ssm.GetParametersInput {
-		Names:  []*string{aws.String(query)},
-		WithDecryption: aws.Bool(false),
+func (s *SSMManager) GetParameter(query string, withDecryption bool) (*ssm.Parameter, error) {
+	params := &ssm.GetParameterInput {
+		Name:  aws.String(query),
+		WithDecryption: aws.Bool(withDecryption),
 	}
 
-	resp, err := s.svc.GetParameters(params)
+	resp, err := s.svc.GetParameter(params)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp.Parameters, nil
+	return resp.Parameter, nil
 }
 
 func (s *SSMManager) DescribeParameters() ([]*ssm.ParameterMetadata, error) {

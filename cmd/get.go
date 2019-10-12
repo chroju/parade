@@ -12,6 +12,7 @@ import (
 
 var (
 	isAmbiguous bool
+	isDecryption bool
 
 	GetCommand = &cobra.Command{
 		Use: "get",
@@ -34,19 +35,19 @@ var (
 				for _, v := range resp {
 					index := strings.Index(*v.Name, query)
 					if index >= 0 {
-						resp, err := ssmManager.GetParameters(v)
+						resp, err := ssmManager.GetParameter(*v.Name, isDecryption)
 						if err != nil {
 							fmt.Println(err)
 						}
-						printValuesWithColor(w, ssmManager, *v.Name, *resp[0].Value, index, index+len(query))
+						printValuesWithColor(w, ssmManager, *v.Name, *resp.Value, index, index+len(query))
 					}
 				}
 			} else {
-				resp, err := ssmManager.GetParameters(query)
+				resp, err := ssmManager.GetParameter(query, isDecryption)
 				if err != nil {
-					fmt.Println(err)
+					return
 				}
-				printValue(w, query, *resp[0].Value)
+				printValue(w, query, *resp.Value)
 			}
 		},
 	}
@@ -64,5 +65,6 @@ func printValuesWithColor(w *tabwriter.Writer, s *ssmctl.SSMManager, key string,
 }
 
 func init() {
-	GetCommand.PersistentFlags().BoolVarP(&isAmbiguous, "ambiguous", "a", false, "get all keys")
+	GetCommand.PersistentFlags().BoolVarP(&isAmbiguous, "ambiguous", "a", false, "get all values of the keys partial match")
+	GetCommand.PersistentFlags().BoolVarP(&isDecryption, "decrypt", "d", false, "get keys with decription")
 }
