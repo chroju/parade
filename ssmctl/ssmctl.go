@@ -53,3 +53,25 @@ func (s *SSMManager) DescribeParameters() ([]*ssm.ParameterMetadata, error) {
 
 	return result, nil
 }
+
+func (s *SSMManager) PutParameter(key string, value string, isEncryption bool, isForce bool) error {
+	var paramType string
+	if isEncryption {
+		paramType = "SecureString"
+	} else {
+		paramType = "String"
+	}
+
+	param := &ssm.PutParameterInput {
+		Name:  aws.String(key),
+		Value: aws.String(value),
+		Type: aws.String(paramType),
+		Overwrite: aws.Bool(isForce),
+	}
+
+	if _, err := s.svc.PutParameter(param); err != nil {
+		return err
+	}
+
+	return nil
+}

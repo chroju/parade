@@ -33,4 +33,5 @@ func Execute(w io.Writer, e io.Writer) error {
 func init() {
 	rootCmd.AddCommand(KeysCommand)
 	rootCmd.AddCommand(GetCommand)
+	rootCmd.AddCommand(SetCommand)
 }
