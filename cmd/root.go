@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"errors"
 	"io"
-	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +17,8 @@ var (
 		Short: "simple SSM parameters CLI",
 		Long: `Parade is a simple CLI tool for AWS SSM parameter store.
 	Easy to read and writer key values in your parameter store.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Usage: keys")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return errors.New("Use subcommand: keys, get, set, del")
 		},
 	}
 )
@@ -34,4 +34,5 @@ func init() {
 	rootCmd.AddCommand(KeysCommand)
 	rootCmd.AddCommand(GetCommand)
 	rootCmd.AddCommand(SetCommand)
+	rootCmd.AddCommand(DelCommand)
 }

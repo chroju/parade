@@ -75,3 +75,16 @@ func (s *SSMManager) PutParameter(key string, value string, isEncryption bool, i
 
 	return nil
 }
+
+func (s *SSMManager) DeleteParameter(key string) error {
+	param := &ssm.DeleteParameterInput {
+		Name:  aws.String(key),
+	}
+
+	if _, err := s.svc.DeleteParameter(param); err != nil {
+		return err
+	}
+
+	return nil
+}
+
