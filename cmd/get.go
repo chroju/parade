@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"github.com/spf13/cobra"
 	"github.com/chroju/para/ssmctl"
@@ -14,22 +13,23 @@ var (
 	isAmbiguous bool
 	isDecryption bool
 
+	// GetCommand is the command to get values of the specified keys
 	GetCommand = &cobra.Command{
 		Use: "get",
 		Short: "Get key value",
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			w := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
+			w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
 			query := args[0]
 			ssmManager, err := ssmctl.New()
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintln(ErrWriter, err)
 			}
 
 			if isAmbiguous {
 				resp, err := ssmManager.DescribeParameters()
 				if err != nil {
-					fmt.Println(err)
+					fmt.Fprintln(ErrWriter, err)
 				}
 
 				for _, v := range resp {
@@ -37,7 +37,7 @@ var (
 					if index >= 0 {
 						resp, err := ssmManager.GetParameter(*v.Name, isDecryption)
 						if err != nil {
-							fmt.Println(err)
+							fmt.Fprintln(ErrWriter, err)
 						}
 						printValuesWithColor(w, ssmManager, *v.Name, *resp.Value, index, index+len(query))
 					}

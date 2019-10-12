@@ -8,6 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
+// KeysCommand is the command to search keys with partial match
 var KeysCommand = &cobra.Command{
 	Use: "keys",
 	Short: "Get keys",
@@ -15,12 +16,12 @@ var KeysCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ssmManager, err := ssmctl.New()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(ErrWriter, err)
 		}
 
 		resp, err := ssmManager.DescribeParameters()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(ErrWriter, err)
 		}
 
 		for _, v := range resp {
@@ -29,7 +30,7 @@ var KeysCommand = &cobra.Command{
 			if index >= 0 {
 				end := index + len(args[0])
 				coloredKey := key[0:index] + color.RedString(key[index:end]) + key[end:]
-				fmt.Printf("%v\n", coloredKey)
+				fmt.Fprintf(StdWriter, "%v\n", coloredKey)
 			}
 		}
 	},
