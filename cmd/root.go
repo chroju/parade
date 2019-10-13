@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"io"
+
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +14,7 @@ var (
 	ErrWriter io.Writer
 
 	rootCmd = &cobra.Command{
-		Use: "parade",
+		Use:   "parade",
 		Short: "simple SSM parameters CLI",
 		Long: `Parade is a simple CLI tool for AWS SSM parameter store.
 	Easy to read and writer key values in your parameter store.`,

@@ -2,56 +2,60 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
-	"github.com/spf13/cobra"
 	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
+	"github.com/spf13/cobra"
+	"strings"
 	"text/tabwriter"
 )
 
 var (
-	isAmbiguous bool
+	isAmbiguous  bool
 	isDecryption bool
 
 	// GetCommand is the command to get values of the specified keys
 	GetCommand = &cobra.Command{
-		Use: "get",
+		Use:   "get",
 		Short: "Get key value",
-		Args: cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
-			query := args[0]
-			ssmManager, err := ssmctl.New()
-			if err != nil {
-				fmt.Fprintln(ErrWriter, err)
-			}
-
-			if isAmbiguous {
-				resp, err := ssmManager.DescribeParameters()
-				if err != nil {
-					fmt.Fprintln(ErrWriter, err)
-				}
-
-				for _, v := range resp {
-					index := strings.Index(*v.Name, query)
-					if index >= 0 {
-						resp, err := ssmManager.GetParameter(*v.Name, isDecryption)
-						if err != nil {
-							fmt.Fprintln(ErrWriter, err)
-						}
-						printValuesWithColor(w, ssmManager, *v.Name, *resp.Value, index, index+len(query))
-					}
-				}
-			} else {
-				resp, err := ssmManager.GetParameter(query, isDecryption)
-				if err != nil {
-					return
-				}
-				printValue(w, query, *resp.Value)
-			}
+			get(args)
 		},
 	}
 )
+
+func get(args []string) {
+	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
+	query := args[0]
+	ssmManager, err := ssmctl.New()
+	if err != nil {
+		fmt.Fprintln(ErrWriter, err)
+	}
+
+	if isAmbiguous {
+		resp, err := ssmManager.DescribeParameters()
+		if err != nil {
+			fmt.Fprintln(ErrWriter, err)
+		}
+
+		for _, v := range resp {
+			index := strings.Index(*v.Name, query)
+			if index >= 0 {
+				resp, err := ssmManager.GetParameter(*v.Name, isDecryption)
+				if err != nil {
+					fmt.Fprintln(ErrWriter, err)
+				}
+				printValuesWithColor(w, ssmManager, *v.Name, *resp.Value, index, index+len(query))
+			}
+		}
+	} else {
+		resp, err := ssmManager.GetParameter(query, isDecryption)
+		if err != nil {
+			return
+		}
+		printValue(w, query, *resp.Value)
+	}
+}
 
 func printValue(w *tabwriter.Writer, key string, value string) {
 	fmt.Fprintf(w, "%s\t%s\n", key, value)

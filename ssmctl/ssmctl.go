@@ -21,8 +21,8 @@ func New() (*SSMManager, error) {
 }
 
 func (s *SSMManager) GetParameter(query string, withDecryption bool) (*ssm.Parameter, error) {
-	params := &ssm.GetParameterInput {
-		Name:  aws.String(query),
+	params := &ssm.GetParameterInput{
+		Name:           aws.String(query),
 		WithDecryption: aws.Bool(withDecryption),
 	}
 
@@ -35,7 +35,7 @@ func (s *SSMManager) GetParameter(query string, withDecryption bool) (*ssm.Param
 }
 
 func (s *SSMManager) DescribeParameters() ([]*ssm.ParameterMetadata, error) {
-	params := &ssm.DescribeParametersInput {
+	params := &ssm.DescribeParametersInput{
 		MaxResults: aws.Int64(50),
 	}
 
@@ -63,10 +63,10 @@ func (s *SSMManager) PutParameter(key string, value string, isEncryption bool, i
 		paramType = "String"
 	}
 
-	param := &ssm.PutParameterInput {
-		Name:  aws.String(key),
-		Value: aws.String(value),
-		Type: aws.String(paramType),
+	param := &ssm.PutParameterInput{
+		Name:      aws.String(key),
+		Value:     aws.String(value),
+		Type:      aws.String(paramType),
 		Overwrite: aws.Bool(isForce),
 	}
 
@@ -78,8 +78,8 @@ func (s *SSMManager) PutParameter(key string, value string, isEncryption bool, i
 }
 
 func (s *SSMManager) DeleteParameter(key string) error {
-	param := &ssm.DeleteParameterInput {
-		Name:  aws.String(key),
+	param := &ssm.DeleteParameterInput{
+		Name: aws.String(key),
 	}
 
 	if _, err := s.svc.DeleteParameter(param); err != nil {
@@ -88,4 +88,3 @@ func (s *SSMManager) DeleteParameter(key string) error {
 
 	return nil
 }
-
