@@ -1,8 +1,8 @@
 Parade
 ======
 
-![](https://img.shields.io/github/v/release/chroju/parade.svg)
-![](https://github.com/chroju/parade/workflows/test/badge.svg) 
+[![release badge](https://img.shields.io/github/v/release/chroju/parade.svg)](https://github.com/chroju/parade/releases)
+[![test badge](https://github.com/chroju/parade/workflows/test/badge.svg)](https://github.com/chroju/parade/actions?workflow=test)
 
 Parade is a simple CLI tool for AWS SSM parameter store. Easy to read and write key values in your parameter store.
 
@@ -24,7 +24,7 @@ $ go get github.com/chroju/parade
 Authenticate
 ------------
 
-Parade requires your AWS IAM user authentications. Same authentication method as [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) is available. Tools like [aws-vault](https://github.com/99designs/aws-vault) can be used as well.
+Parade requires your AWS IAM user authentications. The same authentication method as [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) is available. Tools like [aws-vault](https://github.com/99designs/aws-vault) can be used as well.
 
 ```
 $ aws-vault exec YOUR_PROFILE -- parade
@@ -73,7 +73,7 @@ $ parade set /service1/dev/key4 value4
 done.
 ```
 
-Use `--force` flag to if you want to overwrite.
+Use `--force` flag if you want to overwrite.
 
 ```
 $ parade set /service1/dev/key4 value5
@@ -89,7 +89,7 @@ The value is stored as `String` type by default. It also supports `SecureString`
 
 ### del
 
-Delete key value.
+Delete a key value.
 
 ```
 $ parade del /service1/dev/key4
