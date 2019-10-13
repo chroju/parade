@@ -4,10 +4,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
 )
 
 type SSMManager struct {
-	svc *ssm.SSM
+	svc ssmiface.SSMAPI
 }
 
 func New() (*SSMManager, error) {
