@@ -1,8 +1,8 @@
 Parade
 ======
 
-![](https://img.shields.io/github/release/chroju/parade.svg)
-![](https://github.com/chroju/parade/workflows/test/badge.svg?style=flat-square) 
+![](https://img.shields.io/github/v/release/chroju/parade.svg)
+![](https://github.com/chroju/parade/workflows/test/badge.svg) 
 
 Parade is a simple CLI tool for AWS SSM parameter store. Easy to read and write key values in your parameter store.
 
