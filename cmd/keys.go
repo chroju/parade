@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
@@ -30,13 +31,15 @@ func keys(args []string) {
 		fmt.Fprintln(ErrWriter, err)
 	}
 
+	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
 	for _, v := range resp {
 		key := v.Name
 		index := strings.Index(key, args[0])
 		if index >= 0 {
 			end := index + len(args[0])
 			coloredKey := key[0:index] + color.RedString(key[index:end]) + key[end:]
-			fmt.Fprintf(StdWriter, "%v\n", coloredKey)
+			fmt.Fprintf(w, "%s\tType: %s\n", coloredKey, v.Type)
 		}
 	}
+	w.Flush()
 }
