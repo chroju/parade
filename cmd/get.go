@@ -20,18 +20,14 @@ var (
 		Short: "Get key value",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			get(args)
+			get(ssmManager, args)
 		},
 	}
 )
 
-func get(args []string) {
+func get(ssmManager *ssmctl.SSMManager, args []string) {
 	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
 	query := args[0]
-	ssmManager, err := ssmctl.New()
-	if err != nil {
-		fmt.Fprintln(ErrWriter, err)
-	}
 
 	if isAmbiguous {
 		resp, err := ssmManager.DescribeParameters(query)

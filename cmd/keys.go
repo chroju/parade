@@ -16,15 +16,11 @@ var KeysCommand = &cobra.Command{
 	Short: "Get keys",
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
-		keys(args)
+		keys(ssmManager, args)
 	},
 }
 
-func keys(args []string) {
-	ssmManager, err := ssmctl.New()
-	if err != nil {
-		fmt.Fprintln(ErrWriter, err)
-	}
+func keys(ssmManager *ssmctl.SSMManager, args []string) {
 	query := ""
 	if len(args) != 0 {
 		query = args[0]

@@ -15,21 +15,15 @@ var (
 		Short: "Delete key value",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			del(args)
+			del(ssmManager, args)
 		},
 	}
 )
 
-func del(args []string) {
+func del(ssmManager *ssmctl.SSMManager, args []string) {
 	key := args[0]
 
-	ssmManager, err := ssmctl.New()
-	if err != nil {
-		fmt.Fprintln(ErrWriter, err)
-		os.Exit(1)
-	}
-
-	if err = ssmManager.DeleteParameter(key); err != nil {
+	if err := ssmManager.DeleteParameter(key); err != nil {
 		fmt.Fprintln(ErrWriter, err)
 		os.Exit(1)
 	}

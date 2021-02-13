@@ -18,22 +18,16 @@ var (
 		Short: "Set key value",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			set(args)
+			set(ssmManager, args)
 		},
 	}
 )
 
-func set(args []string) {
+func set(ssmManager *ssmctl.SSMManager, args []string) {
 	key := args[0]
 	value := args[1]
 
-	ssmManager, err := ssmctl.New()
-	if err != nil {
-		fmt.Fprintln(ErrWriter, err)
-		os.Exit(1)
-	}
-
-	if err = ssmManager.PutParameter(key, value, isEncryption, isForce); err != nil {
+	if err := ssmManager.PutParameter(key, value, isEncryption, isForce); err != nil {
 		fmt.Fprintln(ErrWriter, err)
 		os.Exit(1)
 	}

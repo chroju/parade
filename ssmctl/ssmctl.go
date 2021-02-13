@@ -2,6 +2,7 @@ package ssmctl
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
@@ -17,9 +18,18 @@ type Parameter struct {
 	Type  string
 }
 
-func New() (*SSMManager, error) {
-	sess := session.Must(session.NewSession())
+func New(profile string) (*SSMManager, error) {
+	var config *aws.Config
+	if profile != "" {
+		config.Credentials = credentials.NewSharedCredentials("", profile)
+	}
+
+	sess := session.Must(session.NewSession(config))
 	svc := ssm.New(sess)
+	_, err := sess.Config.Credentials.Get()
+	if err != nil {
+		return nil, err
+	}
 
 	return &SSMManager{
 		svc: svc,
