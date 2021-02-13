@@ -48,9 +48,17 @@ func (s *SSMManager) GetParameter(query string, withDecryption bool) (*Parameter
 	}, nil
 }
 
-func (s *SSMManager) DescribeParameters() ([]*Parameter, error) {
+func (s *SSMManager) DescribeParameters(query string) ([]*Parameter, error) {
 	params := &ssm.DescribeParametersInput{
 		MaxResults: aws.Int64(50),
+	}
+	if query != "" {
+		filter := &ssm.ParameterStringFilter{
+			Key:    aws.String("Name"),
+			Option: aws.String("Contains"),
+			Values: aws.StringSlice([]string{query}),
+		}
+		params.ParameterFilters = []*ssm.ParameterStringFilter{filter}
 	}
 
 	var metaDatas []*ssm.ParameterMetadata

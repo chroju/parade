@@ -14,7 +14,7 @@ import (
 var KeysCommand = &cobra.Command{
 	Use:   "keys",
 	Short: "Get keys",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		keys(args)
 	},
@@ -25,8 +25,12 @@ func keys(args []string) {
 	if err != nil {
 		fmt.Fprintln(ErrWriter, err)
 	}
+	query := ""
+	if len(args) != 0 {
+		query = args[0]
+	}
 
-	resp, err := ssmManager.DescribeParameters()
+	resp, err := ssmManager.DescribeParameters(query)
 	if err != nil {
 		fmt.Fprintln(ErrWriter, err)
 	}
@@ -34,12 +38,10 @@ func keys(args []string) {
 	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
 	for _, v := range resp {
 		key := v.Name
-		index := strings.Index(key, args[0])
-		if index >= 0 {
-			end := index + len(args[0])
-			coloredKey := key[0:index] + color.RedString(key[index:end]) + key[end:]
-			fmt.Fprintf(w, "%s\tType: %s\n", coloredKey, v.Type)
-		}
+		index := strings.Index(key, query)
+		end := index + len(query)
+		coloredKey := key[0:index] + color.RedString(key[index:end]) + key[end:]
+		fmt.Fprintf(w, "%s\tType: %s\n", coloredKey, v.Type)
 	}
 	w.Flush()
 }

@@ -34,20 +34,18 @@ func get(args []string) {
 	}
 
 	if isAmbiguous {
-		resp, err := ssmManager.DescribeParameters()
+		resp, err := ssmManager.DescribeParameters(query)
 		if err != nil {
 			fmt.Fprintln(ErrWriter, err)
 		}
 
 		for _, v := range resp {
 			index := strings.Index(v.Name, query)
-			if index >= 0 {
-				resp, err := ssmManager.GetParameter(v.Name, isDecryption)
-				if err != nil {
-					fmt.Fprintln(ErrWriter, err)
-				}
-				printValuesWithColor(w, ssmManager, v.Name, resp.Value, index, index+len(query))
+			resp, err := ssmManager.GetParameter(v.Name, isDecryption)
+			if err != nil {
+				fmt.Fprintln(ErrWriter, err)
 			}
+			printValuesWithColor(w, ssmManager, v.Name, resp.Value, index, index+len(query))
 		}
 	} else {
 		resp, err := ssmManager.GetParameter(query, isDecryption)
