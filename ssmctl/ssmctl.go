@@ -36,11 +36,15 @@ func (s *SSMManager) GetParameter(query string, withDecryption bool) (*Parameter
 	if err != nil {
 		return nil, err
 	}
+	value := *resp.Parameter.Value
+	if !withDecryption && *resp.Parameter.Type == "SecureString" {
+		value = "(encrypted)"
+	}
 
 	return &Parameter{
 		Name:  *resp.Parameter.Name,
-		Value: *resp.Parameter.Value,
-		Type:  *resp.Parameter.Value,
+		Value: value,
+		Type:  *resp.Parameter.Type,
 	}, nil
 }
 
