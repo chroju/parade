@@ -11,6 +11,12 @@ type SSMManager struct {
 	svc ssmiface.SSMAPI
 }
 
+type Parameter struct {
+	Name  string
+	Value string
+	Type  string
+}
+
 func New() (*SSMManager, error) {
 	sess := session.Must(session.NewSession())
 	svc := ssm.New(sess)
@@ -20,7 +26,7 @@ func New() (*SSMManager, error) {
 	}, nil
 }
 
-func (s *SSMManager) GetParameter(query string, withDecryption bool) (*ssm.Parameter, error) {
+func (s *SSMManager) GetParameter(query string, withDecryption bool) (*Parameter, error) {
 	params := &ssm.GetParameterInput{
 		Name:           aws.String(query),
 		WithDecryption: aws.Bool(withDecryption),
@@ -31,25 +37,37 @@ func (s *SSMManager) GetParameter(query string, withDecryption bool) (*ssm.Param
 		return nil, err
 	}
 
-	return resp.Parameter, nil
+	return &Parameter{
+		Name:  *resp.Parameter.Name,
+		Value: *resp.Parameter.Value,
+		Type:  *resp.Parameter.Value,
+	}, nil
 }
 
-func (s *SSMManager) DescribeParameters() ([]*ssm.ParameterMetadata, error) {
+func (s *SSMManager) DescribeParameters() ([]*Parameter, error) {
 	params := &ssm.DescribeParametersInput{
 		MaxResults: aws.Int64(50),
 	}
 
-	var result []*ssm.ParameterMetadata
+	var metaDatas []*ssm.ParameterMetadata
 	for {
 		resp, err := s.svc.DescribeParameters(params)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, resp.Parameters...)
+		metaDatas = append(metaDatas, resp.Parameters...)
 		if resp.NextToken == nil {
 			break
 		}
 		params.NextToken = resp.NextToken
+	}
+
+	result := make([]*Parameter, len(metaDatas))
+	for i, v := range metaDatas {
+		result[i] = &Parameter{
+			Name: *v.Name,
+			Type: *v.Type,
+		}
 	}
 
 	return result, nil

@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
+	"text/tabwriter"
+
 	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"strings"
-	"text/tabwriter"
 )
 
 var (
@@ -39,13 +40,13 @@ func get(args []string) {
 		}
 
 		for _, v := range resp {
-			index := strings.Index(*v.Name, query)
+			index := strings.Index(v.Name, query)
 			if index >= 0 {
-				resp, err := ssmManager.GetParameter(*v.Name, isDecryption)
+				resp, err := ssmManager.GetParameter(v.Name, isDecryption)
 				if err != nil {
 					fmt.Fprintln(ErrWriter, err)
 				}
-				printValuesWithColor(w, ssmManager, *v.Name, *resp.Value, index, index+len(query))
+				printValuesWithColor(w, ssmManager, v.Name, resp.Value, index, index+len(query))
 			}
 		}
 	} else {
@@ -53,7 +54,7 @@ func get(args []string) {
 		if err != nil {
 			return
 		}
-		printValue(w, query, *resp.Value)
+		printValue(w, query, resp.Value)
 	}
 }
 

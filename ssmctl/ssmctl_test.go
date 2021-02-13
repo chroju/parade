@@ -91,7 +91,7 @@ func TestGetParameter(t *testing.T) {
 			t.Fatalf("Failed: error = %s", err)
 		}
 
-		if *result.Value != c.expected {
+		if result.Value != c.expected {
 			t.Errorf("want: %s\nget : %s", c.expected, result)
 		}
 	}

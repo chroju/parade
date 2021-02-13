@@ -31,7 +31,7 @@ func keys(args []string) {
 	}
 
 	for _, v := range resp {
-		key := *v.Name
+		key := v.Name
 		index := strings.Index(key, args[0])
 		if index >= 0 {
 			end := index + len(args[0])
