@@ -8,16 +8,19 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
 )
 
+// SSMManager is the wrapper of SSM API.
 type SSMManager struct {
 	svc ssmiface.SSMAPI
 }
 
+// Parameter is the struct of SSM parameter.
 type Parameter struct {
 	Name  string
 	Value string
 	Type  string
 }
 
+// New returns a new SSMManager.
 func New(profile, region string) (*SSMManager, error) {
 	var config *aws.Config
 	if profile != "" {
@@ -40,6 +43,7 @@ func New(profile, region string) (*SSMManager, error) {
 	}, nil
 }
 
+// GetParameter gets a SSM parameter.
 func (s *SSMManager) GetParameter(query string, withDecryption bool) (*Parameter, error) {
 	params := &ssm.GetParameterInput{
 		Name:           aws.String(query),
@@ -62,6 +66,7 @@ func (s *SSMManager) GetParameter(query string, withDecryption bool) (*Parameter
 	}, nil
 }
 
+// DescribeParameters describes SSM parameters.
 func (s *SSMManager) DescribeParameters(query string) ([]*Parameter, error) {
 	params := &ssm.DescribeParametersInput{
 		MaxResults: aws.Int64(50),
@@ -99,6 +104,7 @@ func (s *SSMManager) DescribeParameters(query string) ([]*Parameter, error) {
 	return result, nil
 }
 
+// PutParameter puts a SSM parameter.
 func (s *SSMManager) PutParameter(key string, value string, isEncryption bool, isForce bool) error {
 	var paramType string
 	if isEncryption {
@@ -121,6 +127,7 @@ func (s *SSMManager) PutParameter(key string, value string, isEncryption bool, i
 	return nil
 }
 
+// DeleteParameter deletes a SSM parameter.
 func (s *SSMManager) DeleteParameter(key string) error {
 	param := &ssm.DeleteParameterInput{
 		Name: aws.String(key),
