@@ -27,12 +27,12 @@ func del(args []string) error {
 
 	param, err := ssmManager.GetParameter(key, false)
 	if err != nil {
-		fmt.Fprintln(ErrWriter, color.YellowString(fmt.Sprintf("WARN: %s is not found. Nothing to do.", key)))
+		fmt.Fprintln(ErrWriter, color.YellowString(fmt.Sprintf("WARN: `%s` is not found. Nothing to do.", key)))
 		return nil
 	}
 
 	if !isForceDelete {
-		fmt.Fprintf(ErrWriter, "Delete %s (value: %s) ? (Y/n)\n", key, param.Value)
+		fmt.Fprintf(ErrWriter, "Delete `%s` (value: %s) ? (Y/n)\n", key, param.Value)
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			yn := scanner.Text()
@@ -42,7 +42,7 @@ func del(args []string) error {
 			} else if yn == "N" || yn == "n" {
 				return nil
 			} else {
-				fmt.Println("(Y/n) ?")
+				fmt.Fprint(ErrWriter, "(Y/n) ?")
 			}
 		}
 	}

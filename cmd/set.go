@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -25,6 +27,24 @@ var (
 func set(args []string) error {
 	key := args[0]
 	value := args[1]
+
+	param, err := ssmManager.GetParameter(key, false)
+	if err == nil && !isForce {
+		fmt.Fprintf(ErrWriter, color.YellowString(fmt.Sprintf("WARN: `%s` already exists.\n", key)))
+		fmt.Fprintf(ErrWriter, "Overwrite `%s` (value: %s) ? (Y/n)\n", key, param.Value)
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			yn := scanner.Text()
+
+			if yn == "Y" || yn == "y" {
+				break
+			} else if yn == "N" || yn == "n" {
+				return nil
+			} else {
+				fmt.Fprint(ErrWriter, "(Y/n) ?")
+			}
+		}
+	}
 
 	if err := ssmManager.PutParameter(key, value, isEncryption, isForce); err != nil {
 		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgPutParameter))
