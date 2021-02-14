@@ -14,12 +14,12 @@ var KeysCommand = &cobra.Command{
 	Use:   "keys",
 	Short: "Get keys",
 	Args:  cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-		keys(args)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return keys(args)
 	},
 }
 
-func keys(args []string) {
+func keys(args []string) error {
 	query := ""
 	if len(args) != 0 {
 		query = args[0]
@@ -27,7 +27,9 @@ func keys(args []string) {
 
 	resp, err := ssmManager.DescribeParameters(query)
 	if err != nil {
+		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgDescribeParameters))
 		fmt.Fprintln(ErrWriter, err)
+		return err
 	}
 
 	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
@@ -39,4 +41,6 @@ func keys(args []string) {
 		fmt.Fprintf(w, "%s\tType: %s\n", coloredKey, v.Type)
 	}
 	w.Flush()
+
+	return nil
 }

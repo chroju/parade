@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -16,22 +16,23 @@ var (
 		Use:   "set",
 		Short: "Set key value",
 		Args:  cobra.ExactArgs(2),
-		Run: func(cmd *cobra.Command, args []string) {
-			set(args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return set(args)
 		},
 	}
 )
 
-func set(args []string) {
+func set(args []string) error {
 	key := args[0]
 	value := args[1]
 
 	if err := ssmManager.PutParameter(key, value, isEncryption, isForce); err != nil {
+		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgPutParameter))
 		fmt.Fprintln(ErrWriter, err)
-		os.Exit(1)
+		return err
 	}
 
-	fmt.Fprintln(ErrWriter, "done.")
+	return nil
 }
 
 func init() {

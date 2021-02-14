@@ -15,9 +15,18 @@ import (
 const VERSION = "0.2.0"
 
 const (
+	// ErrMsgAWSProfileNotValid is an error message to notify aws profile is not valid
 	ErrMsgAWSProfileNotValid = `ERROR: AWS credential is not valid.
 
 Use the --profile and --region options, or set the access keys and region in the environment variables.`
+	// ErrMsgDescribeParameters is an error message about DescribeParameters API
+	ErrMsgDescribeParameters = "ERROR: Failed to execute DescribeParameters API."
+	// ErrMsgGetParameter is an error message about GetParameter API
+	ErrMsgGetParameter = "ERROR: Failed to execute GetParameter API."
+	// ErrMsgPutParameter is an error message about PutParameter API
+	ErrMsgPutParameter = "ERROR: Failed to execute PutParameter API."
+	// ErrMsgDeleteParameter is an error message about DeleteParameter API
+	ErrMsgDeleteParameter = "ERROR: Failed to execute DeleteParameter API."
 )
 
 var (

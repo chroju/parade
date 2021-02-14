@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -13,21 +13,22 @@ var (
 		Use:   "del",
 		Short: "Delete key value",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			del(args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return del(args)
 		},
 	}
 )
 
-func del(args []string) {
+func del(args []string) error {
 	key := args[0]
 
 	if err := ssmManager.DeleteParameter(key); err != nil {
+		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgDeleteParameter))
 		fmt.Fprintln(ErrWriter, err)
-		os.Exit(1)
+		return err
 	}
 
-	fmt.Fprintln(ErrWriter, "done.")
+	return nil
 }
 
 func init() {
