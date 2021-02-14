@@ -56,6 +56,6 @@ func set(args []string) error {
 }
 
 func init() {
-	SetCommand.PersistentFlags().BoolVarP(&isEncryption, "encrypt", "e", false, "set value with encryption")
-	SetCommand.PersistentFlags().BoolVarP(&isForce, "force", "f", false, "force to overwrite the existing value")
+	SetCommand.PersistentFlags().BoolVarP(&isEncryption, "encrypt", "e", false, "Encrypt the value and set it")
+	SetCommand.PersistentFlags().BoolVarP(&isForce, "force", "f", false, "Force overwriting of existing values")
 }

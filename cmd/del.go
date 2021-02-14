@@ -57,5 +57,5 @@ func del(args []string) error {
 }
 
 func init() {
-	DelCommand.PersistentFlags().BoolVarP(&isForceDelete, "force", "f", false, "force to delete key and value")
+	DelCommand.PersistentFlags().BoolVarP(&isForceDelete, "force", "f", false, "Force deletion of key and value")
 }

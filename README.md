@@ -9,6 +9,12 @@ Parade is a simple CLI tool for AWS SSM parameter store. Easy to read and write 
 Install
 -------
 
+### Homebrew
+
+```bash
+$ brew install chroju/tap/parade
+```
+
 ### Download binary
 
 Download the latest binary from [here](https://github.com/chroju/parade/releases) and put it in your `$PATH` directory.
@@ -27,23 +33,34 @@ Authenticate
 Parade requires your AWS IAM user authentications. The same authentication method as [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) is available. Tools like [aws-vault](https://github.com/99designs/aws-vault) can be used as well.
 
 ```
+# with command line options
+$ parade --profile YOUR_PROFILE
+
+# with aws-vault
 $ aws-vault exec YOUR_PROFILE -- parade
 ```
+
+Parade uses the following AWS API. If you are dealing with SecureString, you will also need permission to access the kms key.
+
+* ssm:DeleteParameter
+* ssm:DescribeParameters
+* ssm:GetParameter
+* ssm:PutParameter
 
 Usage
 -----
 
-Simple four sub commands. It is similar to redis-cli. 
+There are Simple 4 sub commands. It is similar to redis-cli. 
 
 ### keys
 
-Display keys that match partial search.
+Display keys that match partial search. If no argument is given, all keys will be retrieved.
 
 ```
 $ parade keys dev
-/service1/dev/key1
-/service1/dev/key2
-/service1/dev/key3
+/service1/dev/key1  Type: String
+/service1/dev/key2  Type: String
+/service1/dev/key3  Type: SecureString
 ```
 
 ### get
@@ -64,24 +81,32 @@ $ parade get dev --ambiguous
 /service1/dev/key3  value3
 ```
 
+The `--decrypt` or `-d` option is required to decrypt SecureString.
+
+```
+$ parade get /service1/dev/password
+/service1/dev/password  (encrypted)
+
+$ parade get /service1/dev/password -d
+/service1/dev/password  1234password
+```
+
 ### set
 
-Set new key value.
+Set new key and value.
 
 ```
 $ parade set /service1/dev/key4 value4
-done.
 ```
 
-Use `--force` flag if you want to overwrite.
+If the specified key already exists, you can choose to overwrite it. Use `--force` flag if you want to force overwriting.
 
 ```
 $ parade set /service1/dev/key4 value5
-ParameterAlreadyExists: The parameter already exists. To overwrite this value, set the overwrite option in the request to true.
-        status code: 400, request id: ae21f5d5-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+WARN: `/service1/dev/key4` already exists.
+Overwrite `/service1/dev/key4` (value: value4) ? (Y/n)
 
 $ parade set /service1/dev/key4 value5 --force
-done.
 ```
 
 The value is stored as `String` type by default. It also supports `SecureString` type with the default AWS KMS key and can be specified with the `--encrypt` flag. `StringList` type is not supported.
@@ -89,17 +114,14 @@ The value is stored as `String` type by default. It also supports `SecureString`
 
 ### del
 
-Delete a key value.
+Delete key and value. Use `--force` flag if you want to force deletion.
 
 ```
 $ parade del /service1/dev/key4
-done.
+Delete `/service1/dev/key4` (value: value5) ? (Y/n)
+
+$ parade del /service1/dev/key4 --force
 ```
-
-Author
-----
-
-[chroju](https://github.com/chroju)
 
 LICENSE
 ----

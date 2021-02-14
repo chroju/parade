@@ -70,6 +70,6 @@ func getAndPrintParameter(w *tabwriter.Writer, key string, begin int, end int) e
 }
 
 func init() {
-	GetCommand.PersistentFlags().BoolVarP(&isAmbiguous, "ambiguous", "a", false, "get all values of the keys partial match")
-	GetCommand.PersistentFlags().BoolVarP(&isDecryption, "decrypt", "d", false, "get keys with decription")
+	GetCommand.PersistentFlags().BoolVarP(&isAmbiguous, "ambiguous", "a", false, "Get all values that partially match the specified key")
+	GetCommand.PersistentFlags().BoolVarP(&isDecryption, "decrypt", "d", false, "Get the value by decrypting it")
 }
