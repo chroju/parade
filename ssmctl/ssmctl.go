@@ -18,10 +18,14 @@ type Parameter struct {
 	Type  string
 }
 
-func New(profile string) (*SSMManager, error) {
+func New(profile, region string) (*SSMManager, error) {
 	var config *aws.Config
 	if profile != "" {
 		config.Credentials = credentials.NewSharedCredentials("", profile)
+	}
+
+	if region != "" {
+		config.Region = aws.String(region)
 	}
 
 	sess := session.Must(session.NewSession(config))

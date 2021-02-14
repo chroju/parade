@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
@@ -26,6 +27,7 @@ var (
 	ErrWriter io.Writer
 
 	profile    string
+	region     string
 	ssmManager *ssmctl.SSMManager
 
 	rootCmd = &cobra.Command{
@@ -45,9 +47,13 @@ func Execute(w io.Writer, e io.Writer) error {
 	StdWriter = w
 	ErrWriter = e
 
-	var err error
+	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
+	region = os.Getenv("AWS_DEFAULT_REGION")
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "", "AWS profile")
-	ssmManager, err = ssmctl.New(profile)
+	rootCmd.PersistentFlags().StringVar(&region, "region", "", "AWS region")
+
+	var err error
+	ssmManager, err = ssmctl.New(profile, region)
 	if err != nil {
 		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgAWSProfileNotValid))
 		return err
