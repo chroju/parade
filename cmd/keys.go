@@ -5,7 +5,6 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -16,11 +15,11 @@ var KeysCommand = &cobra.Command{
 	Short: "Get keys",
 	Args:  cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
-		keys(ssmManager, args)
+		keys(args)
 	},
 }
 
-func keys(ssmManager *ssmctl.SSMManager, args []string) {
+func keys(args []string) {
 	query := ""
 	if len(args) != 0 {
 		query = args[0]

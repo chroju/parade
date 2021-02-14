@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/chroju/parade/ssmctl"
 	"github.com/spf13/cobra"
 )
 
@@ -18,12 +17,12 @@ var (
 		Short: "Set key value",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			set(ssmManager, args)
+			set(args)
 		},
 	}
 )
 
-func set(ssmManager *ssmctl.SSMManager, args []string) {
+func set(args []string) {
 	key := args[0]
 	value := args[1]
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/chroju/parade/ssmctl"
 	"github.com/spf13/cobra"
 )
 
@@ -15,12 +14,12 @@ var (
 		Short: "Delete key value",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			del(ssmManager, args)
+			del(args)
 		},
 	}
 )
 
-func del(ssmManager *ssmctl.SSMManager, args []string) {
+func del(args []string) {
 	key := args[0]
 
 	if err := ssmManager.DeleteParameter(key); err != nil {
