@@ -1,41 +1,61 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 
-	"github.com/chroju/parade/ssmctl"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
 var (
+	isForceDelete bool
 	// DelCommand is the command to delete key value
 	DelCommand = &cobra.Command{
 		Use:   "del",
 		Short: "Delete key value",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			del(args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return del(args)
 		},
 	}
 )
 
-func del(args []string) {
+func del(args []string) error {
 	key := args[0]
 
-	ssmManager, err := ssmctl.New()
+	param, err := ssmManager.GetParameter(key, false)
 	if err != nil {
-		fmt.Fprintln(ErrWriter, err)
-		os.Exit(1)
+		fmt.Fprintln(ErrWriter, color.YellowString(fmt.Sprintf("WARN: `%s` is not found. Nothing to do.", key)))
+		return nil
 	}
 
-	if err = ssmManager.DeleteParameter(key); err != nil {
-		fmt.Fprintln(ErrWriter, err)
-		os.Exit(1)
+	if !isForceDelete {
+		fmt.Fprintf(ErrWriter, "Delete `%s` (value: %s) ? (Y/n)\n", key, param.Value)
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			yn := scanner.Text()
+
+			if yn == "Y" || yn == "y" {
+				break
+			} else if yn == "N" || yn == "n" {
+				return nil
+			} else {
+				fmt.Fprint(ErrWriter, "(Y/n) ?")
+			}
+		}
 	}
 
-	fmt.Fprintln(ErrWriter, "done.")
+	if err := ssmManager.DeleteParameter(key); err != nil {
+		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgDeleteParameter))
+		fmt.Fprintln(ErrWriter, err)
+		return err
+	}
+
+	return nil
 }
 
 func init() {
+	DelCommand.PersistentFlags().BoolVarP(&isForceDelete, "force", "f", false, "Force deletion of key and value")
 }

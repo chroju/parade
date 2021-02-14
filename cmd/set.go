@@ -1,10 +1,11 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 
-	"github.com/chroju/parade/ssmctl"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -17,31 +18,44 @@ var (
 		Use:   "set",
 		Short: "Set key value",
 		Args:  cobra.ExactArgs(2),
-		Run: func(cmd *cobra.Command, args []string) {
-			set(args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return set(args)
 		},
 	}
 )
 
-func set(args []string) {
+func set(args []string) error {
 	key := args[0]
 	value := args[1]
 
-	ssmManager, err := ssmctl.New()
-	if err != nil {
-		fmt.Fprintln(ErrWriter, err)
-		os.Exit(1)
+	param, err := ssmManager.GetParameter(key, false)
+	if err == nil && !isForce {
+		fmt.Fprintf(ErrWriter, color.YellowString(fmt.Sprintf("WARN: `%s` already exists.\n", key)))
+		fmt.Fprintf(ErrWriter, "Overwrite `%s` (value: %s) ? (Y/n)\n", key, param.Value)
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			yn := scanner.Text()
+
+			if yn == "Y" || yn == "y" {
+				break
+			} else if yn == "N" || yn == "n" {
+				return nil
+			} else {
+				fmt.Fprint(ErrWriter, "(Y/n) ?")
+			}
+		}
 	}
 
-	if err = ssmManager.PutParameter(key, value, isEncryption, isForce); err != nil {
+	if err := ssmManager.PutParameter(key, value, isEncryption, isForce); err != nil {
+		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgPutParameter))
 		fmt.Fprintln(ErrWriter, err)
-		os.Exit(1)
+		return err
 	}
 
-	fmt.Fprintln(ErrWriter, "done.")
+	return nil
 }
 
 func init() {
-	SetCommand.PersistentFlags().BoolVarP(&isEncryption, "encrypt", "e", false, "set value with encryption")
-	SetCommand.PersistentFlags().BoolVarP(&isForce, "force", "f", false, "force to overwrite the existing value")
+	SetCommand.PersistentFlags().BoolVarP(&isEncryption, "encrypt", "e", false, "Encrypt the value and set it")
+	SetCommand.PersistentFlags().BoolVarP(&isForce, "force", "f", false, "Force overwriting of existing values")
 }

@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"text/tabwriter"
 
-	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -13,30 +13,34 @@ import (
 var KeysCommand = &cobra.Command{
 	Use:   "keys",
 	Short: "Get keys",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		keys(args)
+	Args:  cobra.RangeArgs(0, 1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return keys(args)
 	},
 }
 
-func keys(args []string) {
-	ssmManager, err := ssmctl.New()
-	if err != nil {
-		fmt.Fprintln(ErrWriter, err)
+func keys(args []string) error {
+	query := ""
+	if len(args) != 0 {
+		query = args[0]
 	}
 
-	resp, err := ssmManager.DescribeParameters()
+	resp, err := ssmManager.DescribeParameters(query)
 	if err != nil {
+		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgDescribeParameters))
 		fmt.Fprintln(ErrWriter, err)
+		return err
 	}
 
+	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
 	for _, v := range resp {
-		key := *v.Name
-		index := strings.Index(key, args[0])
-		if index >= 0 {
-			end := index + len(args[0])
-			coloredKey := key[0:index] + color.RedString(key[index:end]) + key[end:]
-			fmt.Fprintf(StdWriter, "%v\n", coloredKey)
-		}
+		key := v.Name
+		index := strings.Index(key, query)
+		end := index + len(query)
+		coloredKey := key[0:index] + color.RedString(key[index:end]) + key[end:]
+		fmt.Fprintf(w, "%s\tType: %s\n", coloredKey, v.Type)
 	}
+	w.Flush()
+
+	return nil
 }

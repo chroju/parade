@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	dummyEncryptedValue = "AQICAHisPp8VufLKy/v36ZsIJKhFrFte0bf1i8qwLrwwZ3aiNAH2ArnKZeHAuXqKYeMTLv3rAAAAYjBgBgkqhkiG9w0BBwagUzBRAgEAMEwGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMDq0EX5D5W/KrGf7CAgEQgB/Q6v9/3vkw+vs8HWwTlGKSHI3sUudrzjyYIPqbaaNP"
+	dummyEncryptedValue = "(encrypted)"
 )
 
 type mockSSMClient struct {
@@ -91,7 +91,7 @@ func TestGetParameter(t *testing.T) {
 			t.Fatalf("Failed: error = %s", err)
 		}
 
-		if *result.Value != c.expected {
+		if result.Value != c.expected {
 			t.Errorf("want: %s\nget : %s", c.expected, result)
 		}
 	}
