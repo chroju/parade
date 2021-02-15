@@ -15,9 +15,10 @@ var (
 
 	// GetCommand is the command to get values of the specified keys
 	GetCommand = &cobra.Command{
-		Use:   "get",
-		Short: "Get key value",
-		Args:  cobra.ExactArgs(1),
+		Use:     "get",
+		Short:   "Get key value",
+		Args:    cobra.ExactArgs(1),
+		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return get(args)
 		},
@@ -31,24 +32,19 @@ func get(args []string) error {
 	if isAmbiguous {
 		resp, err := ssmManager.DescribeParameters(query)
 		if err != nil {
-			fmt.Fprintln(ErrWriter, color.RedString(ErrMsgDescribeParameters))
-			fmt.Fprintln(ErrWriter, err)
-			return err
+			return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
 		}
 
 		for _, v := range resp {
 			index := strings.Index(v.Name, query)
 			if err = getAndPrintParameter(w, v.Name, index, index+len(query)); err != nil {
-				fmt.Fprintln(ErrWriter, color.RedString(ErrMsgGetParameter))
-				fmt.Fprintln(ErrWriter, err)
-				break
+				return fmt.Errorf("%s\n%s", ErrMsgGetParameter, err)
 			}
 		}
 	} else {
 		getAndPrintParameter(w, query, 0, 0)
 		if err := getAndPrintParameter(w, query, 0, 0); err != nil {
-			fmt.Fprintln(ErrWriter, color.RedString(ErrMsgGetParameter))
-			fmt.Fprintln(ErrWriter, err)
+			return fmt.Errorf("%s\n%s", ErrMsgGetParameter, err)
 		}
 	}
 	w.Flush()

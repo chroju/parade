@@ -13,9 +13,10 @@ var (
 	isForceDelete bool
 	// DelCommand is the command to delete key value
 	DelCommand = &cobra.Command{
-		Use:   "del",
-		Short: "Delete key value",
-		Args:  cobra.ExactArgs(1),
+		Use:     "del",
+		Short:   "Delete key value",
+		Args:    cobra.ExactArgs(1),
+		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return del(args)
 		},
@@ -48,9 +49,7 @@ func del(args []string) error {
 	}
 
 	if err := ssmManager.DeleteParameter(key); err != nil {
-		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgDeleteParameter))
-		fmt.Fprintln(ErrWriter, err)
-		return err
+		return fmt.Errorf("%s\n%s", ErrMsgDeleteParameter, err)
 	}
 
 	return nil
