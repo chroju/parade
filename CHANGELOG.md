@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.2.1 (2021/02/15)
+
+* Fix bugs about error handlings
+
 ## 0.2.0 (2021/02/15)
 
 * Add `version` subcommand

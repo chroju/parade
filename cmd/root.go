@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/chroju/parade/ssmctl"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -16,17 +15,18 @@ const VERSION = "0.2.0"
 
 const (
 	// ErrMsgAWSProfileNotValid is an error message to notify aws profile is not valid
-	ErrMsgAWSProfileNotValid = `ERROR: AWS credential is not valid.
+	ErrMsgAWSProfileNotValid = `AWS credential is not valid.
 
-Use the --profile and --region options, or set the access keys and region in the environment variables.`
+Use the --profile and --region options, or set the access keys and region in the environment variables.
+`
 	// ErrMsgDescribeParameters is an error message about DescribeParameters API
-	ErrMsgDescribeParameters = "ERROR: Failed to execute DescribeParameters API."
+	ErrMsgDescribeParameters = "Failed to execute DescribeParameters API."
 	// ErrMsgGetParameter is an error message about GetParameter API
-	ErrMsgGetParameter = "ERROR: Failed to execute GetParameter API."
+	ErrMsgGetParameter = "Failed to execute GetParameter API."
 	// ErrMsgPutParameter is an error message about PutParameter API
-	ErrMsgPutParameter = "ERROR: Failed to execute PutParameter API."
+	ErrMsgPutParameter = "Failed to execute PutParameter API."
 	// ErrMsgDeleteParameter is an error message about DeleteParameter API
-	ErrMsgDeleteParameter = "ERROR: Failed to execute DeleteParameter API."
+	ErrMsgDeleteParameter = "Failed to execute DeleteParameter API."
 )
 
 var (
@@ -61,16 +61,18 @@ func Execute(w io.Writer, e io.Writer) error {
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "", "AWS profile")
 	rootCmd.PersistentFlags().StringVar(&region, "region", "", "AWS region")
 
-	var err error
-	ssmManager, err = ssmctl.New(profile, region)
-	if err != nil {
-		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgAWSProfileNotValid))
-		return err
-	}
-
 	return rootCmd.Execute()
 }
 
 func init() {
 	rootCmd.AddCommand(KeysCommand, GetCommand, SetCommand, DelCommand)
+}
+
+func initializeCredential(cmd *cobra.Command, args []string) error {
+	var err error
+	ssmManager, err = ssmctl.New(profile, region)
+	if err != nil {
+		return fmt.Errorf(ErrMsgAWSProfileNotValid)
+	}
+	return nil
 }

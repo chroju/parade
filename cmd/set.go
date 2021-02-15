@@ -15,9 +15,10 @@ var (
 
 	// SetCommand is the command to set key value
 	SetCommand = &cobra.Command{
-		Use:   "set",
-		Short: "Set key value",
-		Args:  cobra.ExactArgs(2),
+		Use:     "set",
+		Short:   "Set key value",
+		Args:    cobra.ExactArgs(2),
+		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return set(args)
 		},
@@ -47,9 +48,7 @@ func set(args []string) error {
 	}
 
 	if err := ssmManager.PutParameter(key, value, isEncryption, isForce); err != nil {
-		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgPutParameter))
-		fmt.Fprintln(ErrWriter, err)
-		return err
+		return fmt.Errorf("%s\n%s", ErrMsgPutParameter, err)
 	}
 
 	return nil

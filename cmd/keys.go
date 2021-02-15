@@ -11,9 +11,10 @@ import (
 
 // KeysCommand is the command to search keys with partial match
 var KeysCommand = &cobra.Command{
-	Use:   "keys",
-	Short: "Get keys",
-	Args:  cobra.RangeArgs(0, 1),
+	Use:     "keys",
+	Short:   "Get keys",
+	Args:    cobra.RangeArgs(0, 1),
+	PreRunE: initializeCredential,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return keys(args)
 	},
@@ -27,9 +28,7 @@ func keys(args []string) error {
 
 	resp, err := ssmManager.DescribeParameters(query)
 	if err != nil {
-		fmt.Fprintln(ErrWriter, color.RedString(ErrMsgDescribeParameters))
-		fmt.Fprintln(ErrWriter, err)
-		return err
+		return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
 	}
 
 	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
