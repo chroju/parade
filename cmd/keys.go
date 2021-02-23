@@ -12,17 +12,20 @@ import (
 
 const ()
 
-// KeysCommand is the command to search keys with partial match
-var KeysCommand = &cobra.Command{
-	Use:     "keys [query]",
-	Short:   "Search keys in your parameter store",
-	Example: fmt.Sprintf(queryExample, "keys", "keys", "keys", "keys"),
-	Args:    cobra.RangeArgs(0, 1),
-	PreRunE: initializeCredential,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return keys(args)
-	},
-}
+var (
+	isNoTypes bool
+	// KeysCommand is the command to search keys with partial match
+	KeysCommand = &cobra.Command{
+		Use:     "keys [query]",
+		Short:   "Search keys in your parameter store",
+		Example: fmt.Sprintf(queryExample, "keys", "keys", "keys", "keys"),
+		Args:    cobra.RangeArgs(0, 1),
+		PreRunE: initializeCredential,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return keys(args)
+		},
+	}
+)
 
 func keys(args []string) error {
 	query := ""
@@ -48,9 +51,17 @@ func keys(args []string) error {
 		if !isNoColor {
 			key = key[0:begin] + color.RedString(key[begin:end]) + key[end:]
 		}
-		fmt.Fprintf(w, "%s\tType: %s\n", key, v.Type)
+		if isNoTypes {
+			fmt.Fprintf(w, "%s\n", key)
+		} else {
+			fmt.Fprintf(w, "%s\tType: %s\n", key, v.Type)
+		}
 	}
 	w.Flush()
 
 	return nil
+}
+
+func init() {
+	KeysCommand.PersistentFlags().BoolVar(&isNoTypes, "no-types", false, "Turn off parameter type shows")
 }
