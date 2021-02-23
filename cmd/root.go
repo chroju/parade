@@ -19,6 +19,8 @@ const (
 
 Use the --profile and --region options, or set the access keys and region in the environment variables.
 `
+	// ErrMsgQueryFormat is an error message about query format
+	ErrMsgQueryFormat = "The query format is not valid."
 	// ErrMsgDescribeParameters is an error message about DescribeParameters API
 	ErrMsgDescribeParameters = "Failed to execute DescribeParameters API."
 	// ErrMsgGetParameter is an error message about GetParameter API
@@ -27,6 +29,22 @@ Use the --profile and --region options, or set the access keys and region in the
 	ErrMsgPutParameter = "Failed to execute PutParameter API."
 	// ErrMsgDeleteParameter is an error message about DeleteParameter API
 	ErrMsgDeleteParameter = "Failed to execute DeleteParameter API."
+
+	queryExample = `  %s command supports exact match, forward match, and partial match.
+  It usually searches for exact matches.
+
+  $ parade %s /MyService/Test
+
+  Use * as a postfix, the search will be done as a forward match.
+
+  $ parade %s /MyService*
+
+  Furthermore, also use * as a prefix, it becomes a partial match.
+
+  $ parade %s *Test*
+
+  If you do not specify any queries, display all keys.
+`
 )
 
 var (

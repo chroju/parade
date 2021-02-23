@@ -8,6 +8,15 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
 )
 
+const (
+	// DescribeOptionEquals is a describe parameters API option means equals
+	DescribeOptionEquals = "Equals"
+	// DescribeOptionContains is a describe parameters API option means contains
+	DescribeOptionContains = "Contains"
+	// DescribeOptionBeginsWith is a describe parameters API option means beginsWith
+	DescribeOptionBeginsWith = "BeginsWith"
+)
+
 // SSMManager is the wrapper of SSM API.
 type SSMManager struct {
 	svc ssmiface.SSMAPI
@@ -67,14 +76,14 @@ func (s *SSMManager) GetParameter(query string, withDecryption bool) (*Parameter
 }
 
 // DescribeParameters describes SSM parameters.
-func (s *SSMManager) DescribeParameters(query string) ([]*Parameter, error) {
+func (s *SSMManager) DescribeParameters(query string, option string) ([]*Parameter, error) {
 	params := &ssm.DescribeParametersInput{
 		MaxResults: aws.Int64(50),
 	}
 	if query != "" {
 		filter := &ssm.ParameterStringFilter{
 			Key:    aws.String("Name"),
-			Option: aws.String("Contains"),
+			Option: aws.String(option),
 			Values: aws.StringSlice([]string{query}),
 		}
 		params.ParameterFilters = []*ssm.ParameterStringFilter{filter}

@@ -16,7 +16,8 @@ var (
 	// GetCommand is the command to get values of the specified keys
 	GetCommand = &cobra.Command{
 		Use:     "get",
-		Short:   "Get key value",
+		Short:   "Get key and values in your parameter store",
+		Example: fmt.Sprintf(queryExample, "get", "get", "get", "get"),
 		Args:    cobra.ExactArgs(1),
 		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -27,22 +28,19 @@ var (
 
 func get(args []string) error {
 	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
-	query := args[0]
+	query, option, err := queryParser(args[0])
+	if err != nil {
+		return err
+	}
 
-	if isAmbiguous {
-		resp, err := ssmManager.DescribeParameters(query)
-		if err != nil {
-			return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
-		}
+	resp, err := ssmManager.DescribeParameters(query, option)
+	if err != nil {
+		return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
+	}
 
-		for _, v := range resp {
-			index := strings.Index(v.Name, query)
-			if err = getAndPrintParameter(w, v.Name, index, index+len(query)); err != nil {
-				return fmt.Errorf("%s\n%s", ErrMsgGetParameter, err)
-			}
-		}
-	} else {
-		if err := getAndPrintParameter(w, query, 0, 0); err != nil {
+	for _, v := range resp {
+		index := strings.Index(v.Name, query)
+		if err = getAndPrintParameter(w, v.Name, index, index+len(query)); err != nil {
 			return fmt.Errorf("%s\n%s", ErrMsgGetParameter, err)
 		}
 	}
@@ -65,6 +63,5 @@ func getAndPrintParameter(w *tabwriter.Writer, key string, begin int, end int) e
 }
 
 func init() {
-	GetCommand.PersistentFlags().BoolVarP(&isAmbiguous, "ambiguous", "a", false, "Get all values that partially match the specified key")
 	GetCommand.PersistentFlags().BoolVarP(&isDecryption, "decrypt", "d", false, "Get the value by decrypting it")
 }
