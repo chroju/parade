@@ -30,20 +30,46 @@ Use the --profile and --region options, or set the access keys and region in the
 	// ErrMsgDeleteParameter is an error message about DeleteParameter API
 	ErrMsgDeleteParameter = "Failed to execute DeleteParameter API."
 
-	queryExample = `  %s command supports exact match, forward match, and partial match.
+	longDescription = `Parade is a simple CLI tool for AWS SSM parameter store.
+Easy to read and writer key values in your parameter store.
+
+Note:
+  Parade requires your AWS IAM user authentication.
+  The same authentication method as AWS CLI is available.
+  Tools like aws-vault can be used as well.
+`
+
+	queryExampleKeys = `  keys command supports exact match, forward match, and partial match.
   It usually searches for exact matches.
 
-  $ parade %s /MyService/Test
+  $ parade keys /MyService/Test
 
   Use * as a postfix, the search will be done as a forward match.
 
-  $ parade %s /MyService*
+  $ parade keys /MyService*
 
   Furthermore, also use * as a prefix, it becomes a partial match.
 
-  $ parade %s *Test*
+  $ parade keys *Test*
 
   If you do not specify any queries, display all keys.
+`
+	queryExampleGet = `  get command supports exact match, forward match, and partial match.
+  parade usually searches for exact matches, and shows only the value.
+
+  $ parade keys /MyService/Test
+  value
+
+  Use * as a postfix, the search will be done as a forward match and shows matched keys and values.
+
+  $ parade keys /MyService*
+  /MyService/Test  value
+
+  Furthermore, also use * as a prefix, it becomes a partial match.
+
+  $ parade keys *Test*
+  /MyService/Test   value
+  /MyService2/Test  value2
 `
 )
 
@@ -60,10 +86,9 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:     "parade",
-		Short:   "simple SSM parameters CLI",
+		Short:   "parade is a simple AWS SSM parameters CLI",
 		Version: VERSION,
-		Long: `Parade is a simple CLI tool for AWS SSM parameter store.
-	Easy to read and writer key values in your parameter store.`,
+		Long:    longDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return errors.New("Use subcommand: keys, get, set, del")
 		},

@@ -13,8 +13,8 @@ var (
 	isForceDelete bool
 	// DelCommand is the command to delete key value
 	DelCommand = &cobra.Command{
-		Use:     "del",
-		Short:   "Delete key value",
+		Use:     "del <key>",
+		Short:   "Delete key and value in your parameter store.",
 		Args:    cobra.ExactArgs(1),
 		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -56,5 +56,5 @@ func del(args []string) error {
 }
 
 func init() {
-	DelCommand.PersistentFlags().BoolVarP(&isForceDelete, "force", "f", false, "Force deletion of key and value")
+	DelCommand.PersistentFlags().BoolVarP(&isForceDelete, "force", "f", false, "Force deletion of key and value\nDefault, display a prompt to confirm that you want to delete")
 }

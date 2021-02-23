@@ -16,9 +16,9 @@ var (
 
 	// GetCommand is the command to get values of the specified keys
 	GetCommand = &cobra.Command{
-		Use:     "get",
-		Short:   "Get key and values in your parameter store",
-		Example: fmt.Sprintf(queryExample, "get", "get", "get", "get"),
+		Use:     "get <key>",
+		Short:   "Get the value of specified key in your parameter store.",
+		Example: queryExampleGet,
 		Args:    cobra.ExactArgs(1),
 		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {

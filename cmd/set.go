@@ -15,8 +15,8 @@ var (
 
 	// SetCommand is the command to set key value
 	SetCommand = &cobra.Command{
-		Use:     "set",
-		Short:   "Set key value",
+		Use:     "set <key> <value>",
+		Short:   "Set key and value in your parameter store. Overwriting is also possible.",
 		Args:    cobra.ExactArgs(2),
 		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -56,5 +56,5 @@ func set(args []string) error {
 
 func init() {
 	SetCommand.PersistentFlags().BoolVarP(&isEncryption, "encrypt", "e", false, "Encrypt the value and set it")
-	SetCommand.PersistentFlags().BoolVarP(&isForce, "force", "f", false, "Force overwriting of existing values")
+	SetCommand.PersistentFlags().BoolVarP(&isForce, "force", "f", false, "Force overwriting of existing values\nDefault, display a prompt to confirm that\nyou want to overwrite if the specified key already exists")
 }

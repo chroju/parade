@@ -17,7 +17,7 @@ $ brew install chroju/tap/parade
 
 ### Download binary
 
-Download the latest binary from [here](https://github.com/chroju/parade/releases) and put it in your `$PATH` directory.
+Download the latest binary from [here](https://github.com/chroju/parade/releases) and place it in the some directory specified by `$PATH`.
 
 ### go get
 
@@ -27,10 +27,10 @@ If you have set up Go environment, you can also install `parade` with `go get` c
 $ go get github.com/chroju/parade
 ```
 
-Authenticate
-------------
+Authentication
+--------------
 
-Parade requires your AWS IAM user authentications. The same authentication method as [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) is available. Tools like [aws-vault](https://github.com/99designs/aws-vault) can be used as well.
+Parade requires your AWS IAM user authentication. The same authentication method as [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) is available. Tools like [aws-vault](https://github.com/99designs/aws-vault) can be used as well.
 
 ```
 # with command line options
@@ -50,17 +50,38 @@ Parade uses the following AWS API. If you are dealing with SecureString, you wil
 Usage
 -----
 
-There are Simple 4 sub commands. It is similar to redis-cli. 
+There are simple 4 sub commands. It is similar to redis-cli. 
 
 ### keys
 
-Display keys that match partial search. If no argument is given, all keys will be retrieved.
+Search keys and display their types together.
+
+`keys` command supports exact match, forward match, and partial match. It usually searches for exact matches.
+```
+$ parade /service1/dev/key1
+/service1/dev/key1  Type: String
+```
+
+Use `*` as a postfix, the search will be done as a forward match.  Furthermore, also use `*` as a prefix, it becomes a partial match. You can't use `*` as a prefix only.
 
 ```
-$ parade keys dev
-/service1/dev/key1  Type: String
-/service1/dev/key2  Type: String
-/service1/dev/key3  Type: SecureString
+$ parade keys /service1*
+/service1/dev/key1   Type: String
+/service1/dev/key2   Type: String
+/service1/prod/key3  Type: SecureString
+
+$ parade keys *prod*
+/service1/prod/key3  Type: SecureString
+```
+
+If no argument is given, all keys will be retrieved.
+
+```
+$ parade keys
+/service1/dev/key1   Type: String
+/service1/dev/key2   Type: String
+/service1/prod/key3  Type: SecureString
+...
 ```
 
 ### get
@@ -69,26 +90,26 @@ Display the value of the specified key.
 
 ```
 $ parade get /service1/dev/key1
-/service1/dev/key1  value1
+value1
 ```
 
-With `--ambiguous` or `-a` flag, display the value of all keys that matched with partial search.
+You can also do a partial search using `*` as well as the `keys` command.
 
 ```
-$ parade get dev --ambiguous
-/service1/dev/key1  value1
-/service1/dev/key2  value2
-/service1/dev/key3  value3
+$ parade get /service1*
+/service1/dev/key1   value1
+/service1/dev/key2   value2
+/service1/prod/key3  value3
 ```
 
 The `--decrypt` or `-d` option is required to decrypt SecureString.
 
 ```
 $ parade get /service1/dev/password
-/service1/dev/password  (encrypted)
+(encrypted)
 
 $ parade get /service1/dev/password -d
-/service1/dev/password  1234password
+1234password
 ```
 
 ### set
@@ -114,7 +135,7 @@ The value is stored as `String` type by default. It also supports `SecureString`
 
 ### del
 
-Delete key and value. Use `--force` flag if you want to force deletion.
+Delete key and value. Use `--force` flag if you want to skip the confirmation prompt.
 
 ```
 $ parade del /service1/dev/key4
