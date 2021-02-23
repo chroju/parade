@@ -42,7 +42,6 @@ func get(args []string) error {
 			}
 		}
 	} else {
-		getAndPrintParameter(w, query, 0, 0)
 		if err := getAndPrintParameter(w, query, 0, 0); err != nil {
 			return fmt.Errorf("%s\n%s", ErrMsgGetParameter, err)
 		}
