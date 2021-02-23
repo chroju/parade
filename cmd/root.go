@@ -89,6 +89,10 @@ func init() {
 }
 
 func initializeCredential(cmd *cobra.Command, args []string) error {
+	if args[0] == "--help" || args[0] == "-h" {
+		return nil
+	}
+
 	var err error
 	ssmManager, err = ssmctl.New(profile, region)
 	if err != nil {
