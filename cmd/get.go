@@ -5,6 +5,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -31,6 +32,15 @@ func get(args []string) error {
 	query, option, err := queryParser(args[0])
 	if err != nil {
 		return err
+	}
+
+	if option == ssmctl.DescribeOptionEquals {
+		resp, err := ssmManager.GetParameter(query, isDecryption)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(StdWriter, resp.Value)
+		return nil
 	}
 
 	resp, err := ssmManager.DescribeParameters(query, option)
