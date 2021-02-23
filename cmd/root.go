@@ -55,6 +55,7 @@ var (
 
 	profile    string
 	region     string
+	isNoColor  bool
 	ssmManager *ssmctl.SSMManager
 
 	rootCmd = &cobra.Command{
@@ -78,6 +79,7 @@ func Execute(w io.Writer, e io.Writer) error {
 	region = os.Getenv("AWS_DEFAULT_REGION")
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "", "AWS profile")
 	rootCmd.PersistentFlags().StringVar(&region, "region", "", "AWS region")
+	rootCmd.PersistentFlags().BoolVar(&isNoColor, "no-color", false, "Turn off colored output")
 
 	return rootCmd.Execute()
 }

@@ -55,9 +55,13 @@ func getAndPrintParameter(w *tabwriter.Writer, key string, begin int, end int) e
 		return err
 	}
 
-	coloredKey := key[0:begin] + color.RedString(key[begin:end]) + key[end:]
-	value := strings.ReplaceAll(resp.Value, "\n", color.YellowString("\\n"))
-	fmt.Fprintf(w, "%s\t%s\n", coloredKey, value)
+	replacedLF := "\\n"
+	if !isNoColor {
+		key = key[0:begin] + color.RedString(key[begin:end]) + key[end:]
+		replacedLF = color.YellowString("\\n")
+	}
+	value := strings.ReplaceAll(resp.Value, "\n", replacedLF)
+	fmt.Fprintf(w, "%s\t%s\n", key, value)
 
 	return nil
 }

@@ -43,10 +43,12 @@ func keys(args []string) error {
 	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
 	for _, v := range resp {
 		key := v.Name
-		index := strings.Index(key, query)
-		end := index + len(query)
-		coloredKey := key[0:index] + color.RedString(key[index:end]) + key[end:]
-		fmt.Fprintf(w, "%s\tType: %s\n", coloredKey, v.Type)
+		begin := strings.Index(key, query)
+		end := begin + len(query)
+		if !isNoColor {
+			key = key[0:begin] + color.RedString(key[begin:end]) + key[end:]
+		}
+		fmt.Fprintf(w, "%s\tType: %s\n", key, v.Type)
 	}
 	w.Flush()
 
