@@ -2,7 +2,7 @@
 
 ## 0.3.0 (2021/02/23)
 
-* Support Apple sillicon.
+* Support Apple silicon.
 * Update `keys` and `get` subcommands query format.
   * Use `*` to specify the partial match and the forward match.
   * Deprecate `get` command `--ambiguious` option.
