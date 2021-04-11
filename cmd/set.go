@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -16,19 +17,22 @@ var (
 
 	// SetCommand is the command to set key value
 	SetCommand = &cobra.Command{
-		Use:     "set <key> <value>",
-		Short:   "Set key and value in your parameter store. Overwriting is also possible.",
-		Args:    cobra.ExactArgs(2),
-		PreRunE: initializeCredential,
+		Use:   "set <key> <value>",
+		Short: "Set key and value in your parameter store. Overwriting is also possible.",
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			outWriter := os.Stdout
 			errWriter := os.Stderr
-			return set(args, outWriter, errWriter)
+			ssmManager, err := initializeCredential(flagProfile, flagRegion)
+			if err != nil {
+				return err
+			}
+			return set(args, ssmManager, outWriter, errWriter)
 		},
 	}
 )
 
-func set(args []string, outWriter, errWriter io.Writer) error {
+func set(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
 	key := args[0]
 	value := args[1]
 

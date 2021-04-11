@@ -22,16 +22,19 @@ var (
 		Short:   "Get the value of specified key in your parameter store.",
 		Example: queryExampleGet,
 		Args:    cobra.ExactArgs(1),
-		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			outWriter := os.Stdout
 			errWriter := os.Stderr
-			return get(args, outWriter, errWriter)
+			ssmManager, err := initializeCredential(flagProfile, flagRegion)
+			if err != nil {
+				return err
+			}
+			return get(args, ssmManager, outWriter, errWriter)
 		},
 	}
 )
 
-func get(args []string, outWriter, errWiter io.Writer) error {
+func get(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
 	w := tabwriter.NewWriter(outWriter, 0, 2, 2, ' ', 0)
 	query, option, err := queryParser(args[0])
 	if err != nil {
@@ -54,7 +57,7 @@ func get(args []string, outWriter, errWiter io.Writer) error {
 
 	for _, v := range resp {
 		index := strings.Index(v.Name, query)
-		if err = getAndPrintParameter(w, v.Name, index, index+len(query)); err != nil {
+		if err = getAndPrintParameter(w, ssmManager, v.Name, index, index+len(query)); err != nil {
 			return fmt.Errorf("%s\n%s", ErrMsgGetParameter, err)
 		}
 	}
@@ -63,14 +66,14 @@ func get(args []string, outWriter, errWiter io.Writer) error {
 	return nil
 }
 
-func getAndPrintParameter(w *tabwriter.Writer, key string, begin int, end int) error {
+func getAndPrintParameter(w *tabwriter.Writer, ssmManager *ssmctl.SSMManager, key string, begin, end int) error {
 	resp, err := ssmManager.GetParameter(key, isDecryption)
 	if err != nil {
 		return err
 	}
 
 	replacedLF := "\\n"
-	if !isNoColor {
+	if !flagIsNoColor {
 		key = key[0:begin] + color.RedString(key[begin:end]) + key[end:]
 		replacedLF = color.YellowString("\\n")
 	}

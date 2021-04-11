@@ -22,16 +22,19 @@ var (
 		Short:   "Search and show keys in your parameter store.",
 		Example: queryExampleKeys,
 		Args:    cobra.RangeArgs(0, 1),
-		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			outWriter := os.Stdout
 			errWriter := os.Stderr
-			return keys(args, outWriter, errWriter)
+			ssmManager, err := initializeCredential(flagProfile, flagRegion)
+			if err != nil {
+				return err
+			}
+			return keys(args, ssmManager, outWriter, errWriter)
 		},
 	}
 )
 
-func keys(args []string, outWriter, errWriter io.Writer) error {
+func keys(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
 	query := ""
 	option := ssmctl.DescribeOptionEquals
 	if len(args) != 0 {
@@ -52,7 +55,7 @@ func keys(args []string, outWriter, errWriter io.Writer) error {
 		key := v.Name
 		begin := strings.Index(key, query)
 		end := begin + len(query)
-		if !isNoColor {
+		if !flagIsNoColor {
 			key = key[0:begin] + color.RedString(key[begin:end]) + key[end:]
 		}
 		if isNoTypes {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/chroju/parade/ssmctl"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -14,19 +15,22 @@ var (
 	isForceDelete bool
 	// DelCommand is the command to delete key value
 	DelCommand = &cobra.Command{
-		Use:     "del <key>",
-		Short:   "Delete key and value in your parameter store.",
-		Args:    cobra.ExactArgs(1),
-		PreRunE: initializeCredential,
+		Use:   "del <key>",
+		Short: "Delete key and value in your parameter store.",
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			outWriter := os.Stdout
 			errWriter := os.Stderr
-			return del(args, outWriter, errWriter)
+			ssmManager, err := initializeCredential(flagProfile, flagRegion)
+			if err != nil {
+				return err
+			}
+			return del(args, ssmManager, outWriter, errWriter)
 		},
 	}
 )
 
-func del(args []string, outWriter, errWriter io.Writer) error {
+func del(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
 	key := args[0]
 
 	param, err := ssmManager.GetParameter(key, false)

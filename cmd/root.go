@@ -73,10 +73,9 @@ Note:
 )
 
 var (
-	profile    string
-	region     string
-	isNoColor  bool
-	ssmManager *ssmctl.SSMManager
+	flagProfile   string
+	flagRegion    string
+	flagIsNoColor bool
 
 	rootCmd = &cobra.Command{
 		Use:     "parade",
@@ -91,11 +90,11 @@ var (
 
 // Execute executes the root command
 func Execute() error {
-	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "", "AWS profile")
-	rootCmd.PersistentFlags().StringVar(&region, "region", "", "AWS region")
-	rootCmd.PersistentFlags().BoolVar(&isNoColor, "no-color", false, "Turn off colored output")
+	rootCmd.PersistentFlags().StringVarP(&flagProfile, "profile", "p", "", "AWS profile")
+	rootCmd.PersistentFlags().StringVar(&flagRegion, "region", "", "AWS region")
+	rootCmd.PersistentFlags().BoolVar(&flagIsNoColor, "no-color", false, "Turn off colored output")
 	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
-	region = os.Getenv("AWS_DEFAULT_REGION")
+	flagRegion = os.Getenv("AWS_DEFAULT_REGION")
 
 	return rootCmd.Execute()
 }
@@ -104,15 +103,10 @@ func init() {
 	rootCmd.AddCommand(KeysCommand, GetCommand, SetCommand, DelCommand)
 }
 
-func initializeCredential(cmd *cobra.Command, args []string) error {
-	if args[0] == "--help" || args[0] == "-h" {
-		return nil
-	}
-
-	var err error
-	ssmManager, err = ssmctl.New(profile, region)
+func initializeCredential(profile, region string) (*ssmctl.SSMManager, error) {
+	ssmManager, err := ssmctl.New(profile, region)
 	if err != nil {
-		return fmt.Errorf(ErrMsgAWSProfileNotValid)
+		return nil, fmt.Errorf(ErrMsgAWSProfileNotValid)
 	}
-	return nil
+	return ssmManager, nil
 }
