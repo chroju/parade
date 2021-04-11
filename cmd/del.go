@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/fatih/color"
@@ -18,22 +19,24 @@ var (
 		Args:    cobra.ExactArgs(1),
 		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return del(args)
+			outWriter := os.Stdout
+			errWriter := os.Stderr
+			return del(args, outWriter, errWriter)
 		},
 	}
 )
 
-func del(args []string) error {
+func del(args []string, outWriter, errWriter io.Writer) error {
 	key := args[0]
 
 	param, err := ssmManager.GetParameter(key, false)
 	if err != nil {
-		fmt.Fprintln(ErrWriter, color.YellowString(fmt.Sprintf("WARN: `%s` is not found. Nothing to do.", key)))
+		fmt.Fprintln(errWriter, color.YellowString(fmt.Sprintf("WARN: `%s` is not found. Nothing to do.", key)))
 		return nil
 	}
 
 	if !isForceDelete {
-		fmt.Fprintf(ErrWriter, "Delete `%s` (value: %s) ? (Y/n)\n", key, param.Value)
+		fmt.Fprintf(errWriter, "Delete `%s` (value: %s) ? (Y/n)\n", key, param.Value)
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			yn := scanner.Text()
@@ -43,7 +46,7 @@ func del(args []string) error {
 			} else if yn == "N" || yn == "n" {
 				return nil
 			} else {
-				fmt.Fprint(ErrWriter, "(Y/n) ?")
+				fmt.Fprint(errWriter, "(Y/n) ?")
 			}
 		}
 	}

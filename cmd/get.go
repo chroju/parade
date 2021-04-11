@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 	"text/tabwriter"
 
@@ -22,13 +24,15 @@ var (
 		Args:    cobra.ExactArgs(1),
 		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return get(args)
+			outWriter := os.Stdout
+			errWriter := os.Stderr
+			return get(args, outWriter, errWriter)
 		},
 	}
 )
 
-func get(args []string) error {
-	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
+func get(args []string, outWriter, errWiter io.Writer) error {
+	w := tabwriter.NewWriter(outWriter, 0, 2, 2, ' ', 0)
 	query, option, err := queryParser(args[0])
 	if err != nil {
 		return err
@@ -39,7 +43,7 @@ func get(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(StdWriter, resp.Value)
+		fmt.Fprintln(outWriter, resp.Value)
 		return nil
 	}
 

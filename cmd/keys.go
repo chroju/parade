@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 	"text/tabwriter"
 
@@ -22,12 +24,14 @@ var (
 		Args:    cobra.RangeArgs(0, 1),
 		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return keys(args)
+			outWriter := os.Stdout
+			errWriter := os.Stderr
+			return keys(args, outWriter, errWriter)
 		},
 	}
 )
 
-func keys(args []string) error {
+func keys(args []string, outWriter, errWriter io.Writer) error {
 	query := ""
 	option := ssmctl.DescribeOptionEquals
 	if len(args) != 0 {
@@ -43,7 +47,7 @@ func keys(args []string) error {
 		return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
 	}
 
-	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
+	w := tabwriter.NewWriter(outWriter, 0, 2, 2, ' ', 0)
 	for _, v := range resp {
 		key := v.Name
 		begin := strings.Index(key, query)

@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/chroju/parade/ssmctl"
@@ -74,11 +73,6 @@ Note:
 )
 
 var (
-	// StdWriter is the io.Writer for standard output
-	StdWriter io.Writer
-	// ErrWriter is the io.Writer for error output
-	ErrWriter io.Writer
-
 	profile    string
 	region     string
 	isNoColor  bool
@@ -96,10 +90,7 @@ var (
 )
 
 // Execute executes the root command
-func Execute(w io.Writer, e io.Writer) error {
-	StdWriter = w
-	ErrWriter = e
-
+func Execute() error {
 	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
 	region = os.Getenv("AWS_DEFAULT_REGION")
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "", "AWS profile")

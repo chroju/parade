@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/fatih/color"
@@ -20,19 +21,21 @@ var (
 		Args:    cobra.ExactArgs(2),
 		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return set(args)
+			outWriter := os.Stdout
+			errWriter := os.Stderr
+			return set(args, outWriter, errWriter)
 		},
 	}
 )
 
-func set(args []string) error {
+func set(args []string, outWriter, errWriter io.Writer) error {
 	key := args[0]
 	value := args[1]
 
 	param, err := ssmManager.GetParameter(key, false)
 	if err == nil && !isForce {
-		fmt.Fprintf(ErrWriter, color.YellowString(fmt.Sprintf("WARN: `%s` already exists.\n", key)))
-		fmt.Fprintf(ErrWriter, "Overwrite `%s` (value: %s) ? (Y/n)\n", key, param.Value)
+		fmt.Fprintf(errWriter, color.YellowString(fmt.Sprintf("WARN: `%s` already exists.\n", key)))
+		fmt.Fprintf(errWriter, "Overwrite `%s` (value: %s) ? (Y/n)\n", key, param.Value)
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			yn := scanner.Text()
@@ -42,7 +45,7 @@ func set(args []string) error {
 			} else if yn == "N" || yn == "n" {
 				return nil
 			} else {
-				fmt.Fprint(ErrWriter, "(Y/n) ?")
+				fmt.Fprint(errWriter, "(Y/n) ?")
 			}
 		}
 	}
