@@ -91,11 +91,11 @@ var (
 
 // Execute executes the root command
 func Execute() error {
-	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
-	region = os.Getenv("AWS_DEFAULT_REGION")
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "", "AWS profile")
 	rootCmd.PersistentFlags().StringVar(&region, "region", "", "AWS region")
 	rootCmd.PersistentFlags().BoolVar(&isNoColor, "no-color", false, "Turn off colored output")
+	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
+	region = os.Getenv("AWS_DEFAULT_REGION")
 
 	return rootCmd.Execute()
 }

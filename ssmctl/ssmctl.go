@@ -31,7 +31,7 @@ type Parameter struct {
 
 // New returns a new SSMManager.
 func New(profile, region string) (*SSMManager, error) {
-	var config *aws.Config
+	config := &aws.Config{}
 	if profile != "" {
 		config.Credentials = credentials.NewSharedCredentials("", profile)
 	}
