@@ -30,7 +30,7 @@ var (
 	}
 )
 
-func del(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
+func del(args []string, ssmManager ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
 	key := args[0]
 
 	param, err := ssmManager.GetParameter(key, false)

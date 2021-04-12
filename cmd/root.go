@@ -103,7 +103,7 @@ func init() {
 	rootCmd.AddCommand(KeysCommand, GetCommand, SetCommand, DelCommand)
 }
 
-func initializeCredential(profile, region string) (*ssmctl.SSMManager, error) {
+func initializeCredential(profile, region string) (ssmctl.SSMManager, error) {
 	ssmManager, err := ssmctl.New(profile, region)
 	if err != nil {
 		return nil, fmt.Errorf(ErrMsgAWSProfileNotValid)

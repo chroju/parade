@@ -34,7 +34,7 @@ var (
 	}
 )
 
-func keys(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
+func keys(args []string, ssmManager ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
 	query := ""
 	option := ssmctl.DescribeOptionEquals
 	if len(args) != 0 {

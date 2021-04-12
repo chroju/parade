@@ -32,7 +32,7 @@ var (
 	}
 )
 
-func set(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
+func set(args []string, ssmManager ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
 	key := args[0]
 	value := args[1]
 

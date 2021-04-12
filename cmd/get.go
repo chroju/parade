@@ -34,7 +34,7 @@ var (
 	}
 )
 
-func get(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
+func get(args []string, ssmManager ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
 	w := tabwriter.NewWriter(outWriter, 0, 2, 2, ' ', 0)
 	query, option, err := queryParser(args[0])
 	if err != nil {
@@ -66,7 +66,7 @@ func get(args []string, ssmManager *ssmctl.SSMManager, outWriter, errWriter io.W
 	return nil
 }
 
-func getAndPrintParameter(w *tabwriter.Writer, ssmManager *ssmctl.SSMManager, key string, begin, end int) error {
+func getAndPrintParameter(w *tabwriter.Writer, ssmManager ssmctl.SSMManager, key string, begin, end int) error {
 	resp, err := ssmManager.GetParameter(key, isDecryption)
 	if err != nil {
 		return err
