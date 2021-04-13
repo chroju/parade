@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"text/tabwriter"
 
@@ -12,53 +11,76 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const ()
+type keysOption struct {
+	Query     string
+	Option    string
+	IsNoTypes bool
+	IsNoColor bool
 
-var (
-	isNoTypes bool
-	// KeysCommand is the command to search keys with partial match
-	KeysCommand = &cobra.Command{
+	SSMManager ssmctl.SSMManager
+
+	Out    io.Writer
+	ErrOut io.Writer
+}
+
+func newKeysCommand(globalOption *GlobalOption) *cobra.Command {
+	o := &keysOption{}
+
+	cmd := &cobra.Command{
 		Use:     "keys [query]",
 		Short:   "Search and show keys in your parameter store.",
 		Example: queryExampleKeys,
 		Args:    cobra.RangeArgs(0, 1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			outWriter := os.Stdout
-			errWriter := os.Stderr
-			ssmManager, err := initializeCredential(flagProfile, flagRegion)
+			o.SSMManager = globalOption.SSMManager
+			if o.SSMManager == nil {
+				ssmManager, err := initializeCredential(globalOption.Profile, globalOption.Region)
+				if err != nil {
+					return err
+				}
+				o.SSMManager = ssmManager
+			}
+
+			args = cmd.Flags().Args()
+			query := ""
+			if len(args) != 0 {
+				query = args[0]
+			}
+			query, option, err := queryParser(query)
 			if err != nil {
 				return err
 			}
-			return keys(args, ssmManager, outWriter, errWriter)
+			o.Query = query
+			o.Option = option
+			o.IsNoColor = globalOption.IsNoColor
+
+			o.Out = globalOption.Out
+			o.ErrOut = globalOption.ErrOut
+
+			return o.keys()
 		},
 	}
-)
 
-func keys(args []string, ssmManager ssmctl.SSMManager, outWriter, errWriter io.Writer) error {
-	query := ""
-	option := ssmctl.DescribeOptionEquals
-	if len(args) != 0 {
-		var err error
-		query, option, err = queryParser(args[0])
-		if err != nil {
-			return err
-		}
-	}
+	cmd.Flags().BoolVar(&o.IsNoTypes, "no-types", false, "Turn off parameter type shows")
 
-	resp, err := ssmManager.DescribeParameters(query, option)
+	return cmd
+}
+
+func (o *keysOption) keys() error {
+	resp, err := o.SSMManager.DescribeParameters(o.Query, o.Option)
 	if err != nil {
 		return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
 	}
 
-	w := tabwriter.NewWriter(outWriter, 0, 2, 2, ' ', 0)
+	w := tabwriter.NewWriter(o.Out, 0, 2, 2, ' ', 0)
 	for _, v := range resp {
 		key := v.Name
-		begin := strings.Index(key, query)
-		end := begin + len(query)
-		if !flagIsNoColor {
+		begin := strings.Index(key, o.Query)
+		end := begin + len(o.Query)
+		if !o.IsNoColor {
 			key = key[0:begin] + color.RedString(key[begin:end]) + key[end:]
 		}
-		if isNoTypes {
+		if o.IsNoTypes {
 			fmt.Fprintf(w, "%s\n", key)
 		} else {
 			fmt.Fprintf(w, "%s\tType: %s\n", key, v.Type)
@@ -67,8 +89,4 @@ func keys(args []string, ssmManager ssmctl.SSMManager, outWriter, errWriter io.W
 	w.Flush()
 
 	return nil
-}
-
-func init() {
-	KeysCommand.PersistentFlags().BoolVar(&isNoTypes, "no-types", false, "Turn off parameter type shows")
 }

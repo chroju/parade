@@ -9,6 +9,9 @@ import (
 
 func queryParser(query string) (string, string, error) {
 	option := ssmctl.DescribeOptionEquals
+	if query == "" {
+		return query, option, nil
+	}
 	if strings.HasSuffix(query, "*") {
 		query = strings.TrimPrefix(strings.TrimSuffix(query, "*"), "/")
 		if strings.HasPrefix(query, "*") {

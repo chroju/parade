@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/chroju/parade/ssmctl"
@@ -72,12 +73,20 @@ Note:
 `
 )
 
-var (
-	flagProfile   string
-	flagRegion    string
-	flagIsNoColor bool
+type GlobalOption struct {
+	Profile   string
+	Region    string
+	IsNoColor bool
 
-	rootCmd = &cobra.Command{
+	SSMManager ssmctl.SSMManager
+
+	Out    io.Writer
+	ErrOut io.Writer
+}
+
+func NewRootCommand(outWriter, errWriter io.Writer) (*cobra.Command, error) {
+	o := &GlobalOption{}
+	cmd := &cobra.Command{
 		Use:     "parade",
 		Short:   "parade is a simple AWS SSM parameters CLI",
 		Version: VERSION,
@@ -86,21 +95,37 @@ var (
 			return errors.New("Use subcommand: keys, get, set, del")
 		},
 	}
-)
+	cmd.PersistentFlags().StringVarP(&o.Profile, "profile", "p", "", "AWS profile")
+	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
+	cmd.PersistentFlags().StringVar(&o.Region, "region", os.Getenv("AWS_DEFAULT_REGION"), "AWS region")
+	cmd.PersistentFlags().BoolVar(&o.IsNoColor, "no-color", false, "Turn off colored output")
+
+	o.Out = outWriter
+	o.ErrOut = errWriter
+	cmd.SetOut(outWriter)
+	cmd.SetErr(errWriter)
+
+	cmd.AddCommand(
+		newKeysCommand(o),
+		newGetCommand(o),
+		SetCommand,
+		DelCommand,
+	)
+
+	return cmd, nil
+}
 
 // Execute executes the root command
 func Execute() error {
-	rootCmd.PersistentFlags().StringVarP(&flagProfile, "profile", "p", "", "AWS profile")
-	rootCmd.PersistentFlags().StringVar(&flagRegion, "region", "", "AWS region")
-	rootCmd.PersistentFlags().BoolVar(&flagIsNoColor, "no-color", false, "Turn off colored output")
-	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
-	flagRegion = os.Getenv("AWS_DEFAULT_REGION")
+	o := os.Stdout
+	e := os.Stderr
+
+	rootCmd, err := NewRootCommand(o, e)
+	if err != nil {
+		return err
+	}
 
 	return rootCmd.Execute()
-}
-
-func init() {
-	rootCmd.AddCommand(KeysCommand, GetCommand, SetCommand, DelCommand)
 }
 
 func initializeCredential(profile, region string) (ssmctl.SSMManager, error) {
