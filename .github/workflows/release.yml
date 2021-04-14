@@ -7,7 +7,7 @@ on:
 jobs:
   release:
     name: Release Parade
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@master
@@ -19,7 +19,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         env:
           GO111MODULE: on
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         with:
           version: latest
           args: release --rm-dist
