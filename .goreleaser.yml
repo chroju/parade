@@ -27,8 +27,18 @@ archives:
     files:
       - none*
 changelog:
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
+  skip: true
+brews:
+  - name: parade
+    tap:
+      owner: chroju
+      name: homebrew-tap
+      token:
+    url_template: "https://github.com/chroju/parade/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    description: "Parade is a simple CLI tool for AWS SSM parameter store."
+    homepage: "https://github.com/chroju/parade"
+    license: "MIT"
+    test: |
+      system "#{bin}/parade --version"
+    install: |
+      bin.install "parade"
