@@ -57,17 +57,17 @@ Note:
 	queryExampleGet = `  get command supports exact match, forward match, and partial match.
   parade usually searches for exact matches, and shows only the value.
 
-  $ parade keys /MyService/Test
+  $ parade get /MyService/Test
   value
 
   Use * as a postfix, the search will be done as a forward match and shows matched keys and values.
 
-  $ parade keys /MyService*
+  $ parade get /MyService*
   /MyService/Test  value
 
   Furthermore, also use * as a prefix, it becomes a partial match.
 
-  $ parade keys *Test*
+  $ parade get *Test*
   /MyService/Test   value
   /MyService2/Test  value2
 `
