@@ -61,7 +61,9 @@ func newKeysCommand(globalOption *GlobalOption) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&o.IsNoTypes, "no-types", false, "Turn off parameter type shows")
+	cmd.PersistentFlags().BoolVar(&o.IsNoTypes, "no-types", false, "Turn off parameter type shows")
+	cmd.SetOut(globalOption.Out)
+	cmd.SetErr(globalOption.ErrOut)
 
 	return cmd
 }

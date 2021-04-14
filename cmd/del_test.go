@@ -2,13 +2,24 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/chroju/parade/ssmctl"
 )
 
+const (
+	usageDelHelp = "  -h, --help    help for del\n\n"
+)
+
 func Test_delCommand(t *testing.T) {
+	voidCmd := newDelCommand(
+		&GlobalOption{
+			Out:    &bytes.Buffer{},
+			ErrOut: &bytes.Buffer{},
+		},
+	)
 	tests := []struct {
 		name          string
 		command       string
@@ -33,14 +44,14 @@ func Test_delCommand(t *testing.T) {
 		{
 			name:          "two args",
 			command:       "dev prod",
-			wantOutWriter: "",
+			wantOutWriter: fmt.Sprintf("Error: accepts 1 arg(s), received 2\n%s%s", voidCmd.UsageString(), usageDelHelp),
 			wantErrWriter: "",
 			wantErr:       true,
 		},
 		{
 			name:          "no args",
 			command:       "",
-			wantOutWriter: "",
+			wantOutWriter: fmt.Sprintf("Error: accepts 1 arg(s), received 0\n%s%s", voidCmd.UsageString(), usageDelHelp),
 			wantErrWriter: "",
 			wantErr:       true,
 		},

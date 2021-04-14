@@ -56,6 +56,8 @@ func newGetCommand(globalOption *GlobalOption) *cobra.Command {
 	}
 
 	cmd.PersistentFlags().BoolVarP(&o.IsDecryption, "decrypt", "d", false, "Get the value by decrypting it")
+	cmd.SetOut(globalOption.Out)
+	cmd.SetErr(globalOption.ErrOut)
 
 	return cmd
 }

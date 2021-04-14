@@ -2,13 +2,24 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/chroju/parade/ssmctl"
 )
 
+const (
+	usageGetHelp = "  -h, --help      help for get\n\n"
+)
+
 func Test_getCommand(t *testing.T) {
+	voidCmd := newGetCommand(
+		&GlobalOption{
+			Out:    &bytes.Buffer{},
+			ErrOut: &bytes.Buffer{},
+		},
+	)
 	tests := []struct {
 		name          string
 		command       string
@@ -54,14 +65,14 @@ func Test_getCommand(t *testing.T) {
 		{
 			name:          "two args",
 			command:       "dev prod",
-			wantOutWriter: "",
+			wantOutWriter: fmt.Sprintf("Error: accepts 1 arg(s), received 2\n%s%s", voidCmd.UsageString(), usageGetHelp),
 			wantErrWriter: "",
 			wantErr:       true,
 		},
 		{
 			name:          "no args",
 			command:       "",
-			wantOutWriter: "",
+			wantOutWriter: fmt.Sprintf("Error: accepts 1 arg(s), received 0\n%s%s", voidCmd.UsageString(), usageGetHelp),
 			wantErrWriter: "",
 			wantErr:       true,
 		},

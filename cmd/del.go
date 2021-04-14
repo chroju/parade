@@ -49,6 +49,8 @@ func newDelCommand(globalOption *GlobalOption) *cobra.Command {
 	}
 
 	cmd.PersistentFlags().BoolVarP(&o.IsForceDelete, "force", "f", false, "Force deletion of key and value\nDefault, display a prompt to confirm that you want to delete")
+	cmd.SetOut(globalOption.Out)
+	cmd.SetErr(globalOption.ErrOut)
 
 	return cmd
 }

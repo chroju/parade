@@ -52,6 +52,8 @@ func newSetCommand(globalOption *GlobalOption) *cobra.Command {
 
 	cmd.PersistentFlags().BoolVarP(&o.IsEncryption, "encrypt", "e", false, "Encrypt the value and set it")
 	cmd.PersistentFlags().BoolVarP(&o.IsForce, "force", "f", false, "Force overwriting of existing values\nDefault, display a prompt to confirm that\nyou want to overwrite if the specified key already exists")
+	cmd.SetOut(globalOption.Out)
+	cmd.SetErr(globalOption.ErrOut)
 
 	return cmd
 }

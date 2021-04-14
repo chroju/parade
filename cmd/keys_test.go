@@ -2,10 +2,39 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/chroju/parade/ssmctl"
+)
+
+const (
+	usageKeysHelp = "  -h, --help      help for keys\n\n"
+	// TODO
+	usageKeys = `Usage:
+  keys [query] [flags]
+
+Examples:
+  keys command supports exact match, forward match, and partial match.
+  It usually searches for exact matches.
+
+  $ parade keys /MyService/Test
+
+  Use * as a postfix, the search will be done as a forward match.
+
+  $ parade keys /MyService*
+
+  Furthermore, also use * as a prefix, it becomes a partial match.
+
+  $ parade keys *Test*
+
+  If you do not specify any queries, display all keys.
+
+
+Flags:
+  -h, --help       help for keys
+      --no-types   Turn off parameter type shows`
 )
 
 func Test_keysCommand(t *testing.T) {
@@ -44,7 +73,7 @@ func Test_keysCommand(t *testing.T) {
 		{
 			name:          "one arg for no match",
 			command:       "no_match",
-			wantOutWriter: "",
+			wantOutWriter: fmt.Sprintf("Error: %s\nParameterNotFound\n%s\n\n", ErrMsgDescribeParameters, usageKeys),
 			wantErrWriter: "",
 			wantErr:       true,
 		},
