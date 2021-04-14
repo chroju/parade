@@ -18,7 +18,22 @@ const (
 )
 
 // SSMManager is the wrapper of SSM API.
-type SSMManager struct {
+type SSMManager interface {
+	GetParameter(query string, withDecryption bool) (*Parameter, error)
+	DescribeParameters(query string, option string) ([]*Parameter, error)
+	PutParameter(key string, value string, isEncryption bool, isForce bool) error
+	DeleteParameter(key string) error
+}
+
+type ssmManager struct {
+	svc ssmiface.SSMAPI
+}
+
+type SSMClient interface {
+	API() ssmiface.SSMAPI
+}
+
+type ssmClient struct {
 	svc ssmiface.SSMAPI
 }
 
@@ -30,8 +45,8 @@ type Parameter struct {
 }
 
 // New returns a new SSMManager.
-func New(profile, region string) (*SSMManager, error) {
-	var config *aws.Config
+func New(profile, region string) (SSMManager, error) {
+	config := &aws.Config{}
 	if profile != "" {
 		config.Credentials = credentials.NewSharedCredentials("", profile)
 	}
@@ -41,19 +56,19 @@ func New(profile, region string) (*SSMManager, error) {
 	}
 
 	sess := session.Must(session.NewSession(config))
-	svc := ssm.New(sess)
 	_, err := sess.Config.Credentials.Get()
 	if err != nil {
 		return nil, err
 	}
 
-	return &SSMManager{
+	svc := ssm.New(sess)
+	return &ssmManager{
 		svc: svc,
 	}, nil
 }
 
 // GetParameter gets a SSM parameter.
-func (s *SSMManager) GetParameter(query string, withDecryption bool) (*Parameter, error) {
+func (s *ssmManager) GetParameter(query string, withDecryption bool) (*Parameter, error) {
 	params := &ssm.GetParameterInput{
 		Name:           aws.String(query),
 		WithDecryption: aws.Bool(withDecryption),
@@ -76,7 +91,7 @@ func (s *SSMManager) GetParameter(query string, withDecryption bool) (*Parameter
 }
 
 // DescribeParameters describes SSM parameters.
-func (s *SSMManager) DescribeParameters(query string, option string) ([]*Parameter, error) {
+func (s *ssmManager) DescribeParameters(query string, option string) ([]*Parameter, error) {
 	params := &ssm.DescribeParametersInput{
 		MaxResults: aws.Int64(50),
 	}
@@ -114,7 +129,7 @@ func (s *SSMManager) DescribeParameters(query string, option string) ([]*Paramet
 }
 
 // PutParameter puts a SSM parameter.
-func (s *SSMManager) PutParameter(key string, value string, isEncryption bool, isForce bool) error {
+func (s *ssmManager) PutParameter(key string, value string, isEncryption bool, isForce bool) error {
 	var paramType string
 	if isEncryption {
 		paramType = "SecureString"
@@ -137,7 +152,7 @@ func (s *SSMManager) PutParameter(key string, value string, isEncryption bool, i
 }
 
 // DeleteParameter deletes a SSM parameter.
-func (s *SSMManager) DeleteParameter(key string) error {
+func (s *ssmManager) DeleteParameter(key string) error {
 	param := &ssm.DeleteParameterInput{
 		Name: aws.String(key),
 	}

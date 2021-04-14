@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"text/tabwriter"
 
@@ -10,47 +11,76 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	isAmbiguous  bool
-	isDecryption bool
+type getOption struct {
+	Query        string
+	Option       string
+	IsDecryption bool
+	IsNoColor    bool
 
-	// GetCommand is the command to get values of the specified keys
-	GetCommand = &cobra.Command{
+	SSMManager ssmctl.SSMManager
+
+	Out    io.Writer
+	ErrOut io.Writer
+}
+
+func newGetCommand(globalOption *GlobalOption) *cobra.Command {
+	o := &getOption{}
+
+	cmd := &cobra.Command{
 		Use:     "get <key>",
 		Short:   "Get the value of specified key in your parameter store.",
 		Example: queryExampleGet,
 		Args:    cobra.ExactArgs(1),
-		PreRunE: initializeCredential,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return get(args)
+			o.SSMManager = globalOption.SSMManager
+			if o.SSMManager == nil {
+				ssmManager, err := initializeCredential(globalOption.Profile, globalOption.Region)
+				if err != nil {
+					return err
+				}
+				o.SSMManager = ssmManager
+			}
+
+			args = cmd.Flags().Args()
+			var err error
+			o.Query, o.Option, err = queryParser(args[0])
+			if err != nil {
+				return err
+			}
+
+			o.IsNoColor = globalOption.IsNoColor
+			o.Out = globalOption.Out
+			o.ErrOut = globalOption.ErrOut
+			return o.get()
 		},
 	}
-)
 
-func get(args []string) error {
-	w := tabwriter.NewWriter(StdWriter, 0, 2, 2, ' ', 0)
-	query, option, err := queryParser(args[0])
-	if err != nil {
-		return err
-	}
+	cmd.PersistentFlags().BoolVarP(&o.IsDecryption, "decrypt", "d", false, "Get the value by decrypting it")
+	cmd.SetOut(globalOption.Out)
+	cmd.SetErr(globalOption.ErrOut)
 
-	if option == ssmctl.DescribeOptionEquals {
-		resp, err := ssmManager.GetParameter(query, isDecryption)
+	return cmd
+}
+
+func (o *getOption) get() error {
+	w := tabwriter.NewWriter(o.Out, 0, 2, 2, ' ', 0)
+
+	if o.Option == ssmctl.DescribeOptionEquals {
+		resp, err := o.SSMManager.GetParameter(o.Query, o.IsDecryption)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(StdWriter, resp.Value)
+		fmt.Fprintln(o.Out, resp.Value)
 		return nil
 	}
 
-	resp, err := ssmManager.DescribeParameters(query, option)
+	resp, err := o.SSMManager.DescribeParameters(o.Query, o.Option)
 	if err != nil {
 		return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
 	}
 
 	for _, v := range resp {
-		index := strings.Index(v.Name, query)
-		if err = getAndPrintParameter(w, v.Name, index, index+len(query)); err != nil {
+		if err = o.getAndPrintParameter(w, v.Name); err != nil {
 			return fmt.Errorf("%s\n%s", ErrMsgGetParameter, err)
 		}
 	}
@@ -59,23 +89,21 @@ func get(args []string) error {
 	return nil
 }
 
-func getAndPrintParameter(w *tabwriter.Writer, key string, begin int, end int) error {
-	resp, err := ssmManager.GetParameter(key, isDecryption)
+func (o *getOption) getAndPrintParameter(w *tabwriter.Writer, parameter string) error {
+	resp, err := o.SSMManager.GetParameter(parameter, o.IsDecryption)
 	if err != nil {
 		return err
 	}
 
 	replacedLF := "\\n"
-	if !isNoColor {
-		key = key[0:begin] + color.RedString(key[begin:end]) + key[end:]
+	begin := strings.Index(parameter, o.Query)
+	end := begin + len(o.Query)
+	if !o.IsNoColor {
+		parameter = parameter[0:begin] + color.RedString(parameter[begin:end]) + parameter[end:]
 		replacedLF = color.YellowString("\\n")
 	}
 	value := strings.ReplaceAll(resp.Value, "\n", replacedLF)
-	fmt.Fprintf(w, "%s\t%s\n", key, value)
+	fmt.Fprintf(w, "%s\t%s\n", parameter, value)
 
 	return nil
-}
-
-func init() {
-	GetCommand.PersistentFlags().BoolVarP(&isDecryption, "decrypt", "d", false, "Get the value by decrypting it")
 }

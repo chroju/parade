@@ -9,6 +9,9 @@ import (
 
 func queryParser(query string) (string, string, error) {
 	option := ssmctl.DescribeOptionEquals
+	if query == "" {
+		return query, option, nil
+	}
 	if strings.HasSuffix(query, "*") {
 		query = strings.TrimPrefix(strings.TrimSuffix(query, "*"), "/")
 		if strings.HasPrefix(query, "*") {
@@ -25,4 +28,12 @@ func queryParser(query string) (string, string, error) {
 	}
 
 	return query, option, nil
+}
+
+func initializeCredential(profile, region string) (ssmctl.SSMManager, error) {
+	ssmManager, err := ssmctl.New(profile, region)
+	if err != nil {
+		return nil, fmt.Errorf(ErrMsgAWSProfileNotValid)
+	}
+	return ssmManager, nil
 }

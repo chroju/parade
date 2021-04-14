@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.3.1 (2021/04/15)
+
+### BUG FIXES
+
+* Fix bug when running `keys` command with no arguments. (#6)
+* Fix bugs with aws region and profile set up.
+* Fix `get` command usage typos.
+
 ## 0.3.0 (2021/02/23)
 
 * Support Apple silicon.

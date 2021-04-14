@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 
@@ -11,7 +10,7 @@ import (
 )
 
 // VERSION is cli tool version
-const VERSION = "0.3.0"
+const VERSION = "0.3.1"
 
 const (
 	// ErrMsgAWSProfileNotValid is an error message to notify aws profile is not valid
@@ -57,34 +56,36 @@ Note:
 	queryExampleGet = `  get command supports exact match, forward match, and partial match.
   parade usually searches for exact matches, and shows only the value.
 
-  $ parade keys /MyService/Test
+  $ parade get /MyService/Test
   value
 
   Use * as a postfix, the search will be done as a forward match and shows matched keys and values.
 
-  $ parade keys /MyService*
+  $ parade get /MyService*
   /MyService/Test  value
 
   Furthermore, also use * as a prefix, it becomes a partial match.
 
-  $ parade keys *Test*
+  $ parade get *Test*
   /MyService/Test   value
   /MyService2/Test  value2
 `
 )
 
-var (
-	// StdWriter is the io.Writer for standard output
-	StdWriter io.Writer
-	// ErrWriter is the io.Writer for error output
-	ErrWriter io.Writer
+type GlobalOption struct {
+	Profile   string
+	Region    string
+	IsNoColor bool
 
-	profile    string
-	region     string
-	isNoColor  bool
-	ssmManager *ssmctl.SSMManager
+	SSMManager ssmctl.SSMManager
 
-	rootCmd = &cobra.Command{
+	Out    io.Writer
+	ErrOut io.Writer
+}
+
+func NewRootCommand(outWriter, errWriter io.Writer) (*cobra.Command, error) {
+	o := &GlobalOption{}
+	cmd := &cobra.Command{
 		Use:     "parade",
 		Short:   "parade is a simple AWS SSM parameters CLI",
 		Version: VERSION,
@@ -93,35 +94,35 @@ var (
 			return errors.New("Use subcommand: keys, get, set, del")
 		},
 	}
-)
+	cmd.PersistentFlags().StringVarP(&o.Profile, "profile", "p", "", "AWS profile")
+	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
+	cmd.PersistentFlags().StringVar(&o.Region, "region", os.Getenv("AWS_DEFAULT_REGION"), "AWS region")
+	cmd.PersistentFlags().BoolVar(&o.IsNoColor, "no-color", false, "Turn off colored output")
+
+	o.Out = outWriter
+	o.ErrOut = errWriter
+	cmd.SetOut(outWriter)
+	cmd.SetErr(errWriter)
+
+	cmd.AddCommand(
+		newKeysCommand(o),
+		newGetCommand(o),
+		newSetCommand(o),
+		newDelCommand(o),
+	)
+
+	return cmd, nil
+}
 
 // Execute executes the root command
-func Execute(w io.Writer, e io.Writer) error {
-	StdWriter = w
-	ErrWriter = e
+func Execute() error {
+	o := os.Stdout
+	e := os.Stderr
 
-	// aws-sdk-go does not support the AWS_DEFAULT_REGION environment variable
-	region = os.Getenv("AWS_DEFAULT_REGION")
-	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "", "AWS profile")
-	rootCmd.PersistentFlags().StringVar(&region, "region", "", "AWS region")
-	rootCmd.PersistentFlags().BoolVar(&isNoColor, "no-color", false, "Turn off colored output")
+	rootCmd, err := NewRootCommand(o, e)
+	if err != nil {
+		return err
+	}
 
 	return rootCmd.Execute()
-}
-
-func init() {
-	rootCmd.AddCommand(KeysCommand, GetCommand, SetCommand, DelCommand)
-}
-
-func initializeCredential(cmd *cobra.Command, args []string) error {
-	if args[0] == "--help" || args[0] == "-h" {
-		return nil
-	}
-
-	var err error
-	ssmManager, err = ssmctl.New(profile, region)
-	if err != nil {
-		return fmt.Errorf(ErrMsgAWSProfileNotValid)
-	}
-	return nil
 }
