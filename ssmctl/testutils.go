@@ -49,10 +49,15 @@ func NewMockSSMManager() SSMManager {
 func (m *mockSSMClient) GetParameter(i *ssm.GetParameterInput) (*ssm.GetParameterOutput, error) {
 	for _, v := range mockParameters {
 		if *i.Name == *v.Name {
+			value := v.Value
 			if *v.Type == "SecureString" && *i.WithDecryption == false {
-				v.Value = aws.String(dummyEncryptedValue)
+				value = aws.String(dummyEncryptedValue)
 			}
-			return &ssm.GetParameterOutput{Parameter: v}, nil
+			return &ssm.GetParameterOutput{Parameter: &ssm.Parameter{
+				Name:  v.Name,
+				Type:  v.Type,
+				Value: value,
+			}}, nil
 		}
 	}
 
