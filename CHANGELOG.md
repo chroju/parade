@@ -4,31 +4,51 @@
 
 ### BUG FIXES
 
-* Fix bug when running `keys` command with no arguments. (#6)
+* Fix bug when running `keys` command with no arguments. ([#6](https://github.com/chroju/parade/issues/6))
 * Fix bugs with aws region and profile set up.
 * Fix `get` command usage typos.
 
 ## 0.3.0 (2021/02/23)
 
+### NOTE
+
 * Support Apple silicon.
-* Update `keys` and `get` subcommands query format.
-  * Use `*` to specify the partial match and the forward match.
-  * Deprecate `get` command `--ambiguious` option.
-* Modify the output of `get` subcommand.
-  * It does not show the key for an exact match.
+* Deprecate `get` command `--ambiguious` option.
+
+### FEATURES
+
 * Add `--no-color` global option.
 * Add `--no-type` option to `keys` subcommand.
-* Fix some bugs.
-  * Duplicate output from `get` subcommand.
-  * `--help` also required AWS credential.
+
+### ENHANCEMENTS
+
+* Update `keys` and `get` subcommands query format.
+  * Use `*` to specify the partial match and the forward match.
+* Modify the output of `get` subcommand.
+  * It does not show the key for an exact match.
+
+### BUG FIXES
+
+* Fix duplicated output from `get` subcommand.
+* Fix bug, `--help` option also require AWS credential.
 
 ## 0.2.1 (2021/02/15)
+
+### BUG FIXES
 
 * Fix bugs about error handlings.
 
 ## 0.2.0 (2021/02/15)
 
+### FEATURES
+
 * Add `version` subcommand.
+* Add `--region` option.
+* Add `--profile` option.
+* Support `AWS_DEFAULT_REGION` environment variable.
+
+### ENHANCEMENTS
+
 * Improve `keys` subcommand.
     * Display the parameter types.
 * Improve `get` subcommand.
@@ -40,9 +60,9 @@
 * Improve `del` subcommand.
     * Add confirmation prompt before deleting.
     * Add `--force` option.
-* Support `AWS_DEFAULT_REGION` environment variable.
-* Add `--region` option.
-* Add `--profile` option.
+
+### BUG FIXES
+
 * Fix some bugs.
 
 ## 0.1.0 (2019/10/13)
