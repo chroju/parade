@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 
@@ -126,12 +125,4 @@ func Execute() error {
 	}
 
 	return rootCmd.Execute()
-}
-
-func initializeCredential(profile, region string) (ssmctl.SSMManager, error) {
-	ssmManager, err := ssmctl.New(profile, region)
-	if err != nil {
-		return nil, fmt.Errorf(ErrMsgAWSProfileNotValid)
-	}
-	return ssmManager, nil
 }
