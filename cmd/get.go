@@ -42,11 +42,16 @@ func newGetCommand(globalOption *GlobalOption) *cobra.Command {
 			}
 
 			args = cmd.Flags().Args()
-			var err error
-			o.Query, o.Option, err = queryParser(args[0])
+			query := ""
+			if len(args) != 0 {
+				query = args[0]
+			}
+			query, option, err := queryParser(query)
 			if err != nil {
 				return err
 			}
+			o.Query = query
+			o.Option = option
 
 			o.IsNoColor = globalOption.IsNoColor
 			o.Out = globalOption.Out
@@ -63,7 +68,13 @@ func newGetCommand(globalOption *GlobalOption) *cobra.Command {
 }
 
 func (o *getOption) get() error {
-	w := tabwriter.NewWriter(o.Out, 0, 2, 2, ' ', 0)
+	resp, err := o.SSMManager.DescribeParameters(o.Query, o.Option)
+	if err != nil {
+		if strings.Contains(err.Error(), "ParameterNotFound") {
+			return nil
+		}
+		return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
+	}
 
 	if o.Option == ssmctl.DescribeOptionEquals {
 		resp, err := o.SSMManager.GetParameter(o.Query, o.IsDecryption)
@@ -74,10 +85,7 @@ func (o *getOption) get() error {
 		return nil
 	}
 
-	resp, err := o.SSMManager.DescribeParameters(o.Query, o.Option)
-	if err != nil {
-		return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
-	}
+	w := tabwriter.NewWriter(o.Out, 0, 2, 2, ' ', 0)
 
 	for _, v := range resp {
 		if err = o.getAndPrintParameter(w, v.Name); err != nil {
