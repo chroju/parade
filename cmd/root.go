@@ -108,7 +108,7 @@ func NewRootCommand(outWriter, errWriter io.Writer) (*cobra.Command, error) {
 	cmd.AddCommand(
 		newKeysCommand(o),
 		newGetCommand(o),
-		SetCommand,
+		newSetCommand(o),
 		newDelCommand(o),
 	)
 
