@@ -63,6 +63,13 @@ func Test_getCommand(t *testing.T) {
 			wantErr:       false,
 		},
 		{
+			name:          "one arg for not found",
+			command:       "not_found",
+			wantOutWriter: "",
+			wantErrWriter: "",
+			wantErr:       false,
+		},
+		{
 			name:          "two args",
 			command:       "dev prod",
 			wantOutWriter: fmt.Sprintf("Error: accepts 1 arg(s), received 2\n%s%s", voidCmd.UsageString(), usageGetHelp),
