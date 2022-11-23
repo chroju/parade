@@ -1,6 +1,6 @@
 BINARY_NAME=parade
 
-.PHONY: install test lint crossbuild clean
+.PHONY: install test lint build crossbuild clean mod test-coverage
 
 install:
 	go install
@@ -13,6 +13,9 @@ lint:
 
 test: lint
 	go test -v ./...
+
+build:
+	go build -o bin/$(BINARY_NAME)
 
 crossbuild: test
 	gox -os="linux darwin windows" -arch="386 amd64" -output "bin/remo_{{.OS}}_{{.Arch}}/{{.Dir}}"

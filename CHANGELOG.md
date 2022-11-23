@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.4.0 (2022/11/23)
+
+### ENHANCEMENTS
+
+* `set` command support `--kms-key-id` flag to specify a KMS key ID.
+
+### BUG FIXES
+
+* Fix the issue that `get` command fails when the specified key is not found.
+* Fix the issue with error message output to standard out.
+
 ## 0.3.2 (2021/04/16)
 
 ### ENHANCEMENTS

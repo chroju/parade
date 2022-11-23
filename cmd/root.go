@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // VERSION is cli tool version
-const VERSION = "0.3.2"
+const VERSION = "0.4.0"
 
 const (
 	// ErrMsgAWSProfileNotValid is an error message to notify aws profile is not valid
@@ -86,10 +87,12 @@ type GlobalOption struct {
 func NewRootCommand(outWriter, errWriter io.Writer) (*cobra.Command, error) {
 	o := &GlobalOption{}
 	cmd := &cobra.Command{
-		Use:     "parade",
-		Short:   "parade is a simple AWS SSM parameters CLI",
-		Version: VERSION,
-		Long:    longDescription,
+		Use:           "parade",
+		Short:         "parade is a simple AWS SSM parameters CLI",
+		Version:       VERSION,
+		Long:          longDescription,
+		SilenceErrors: true,
+		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return errors.New("Use subcommand: keys, get, set, del")
 		},
@@ -114,15 +117,21 @@ func NewRootCommand(outWriter, errWriter io.Writer) (*cobra.Command, error) {
 	return cmd, nil
 }
 
-// Execute executes the root command
-func Execute() error {
+// Execute executes the root command and returns exit status
+func Execute() int {
 	o := os.Stdout
 	e := os.Stderr
 
 	rootCmd, err := NewRootCommand(o, e)
 	if err != nil {
-		return err
+		fmt.Fprintln(e, err)
+		return 1
 	}
 
-	return rootCmd.Execute()
+	if err = rootCmd.Execute(); err != nil {
+		fmt.Fprintln(e, err)
+		return 1
+	}
+
+	return 0
 }

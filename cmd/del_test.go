@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -14,12 +13,6 @@ const (
 )
 
 func Test_delCommand(t *testing.T) {
-	voidCmd := newDelCommand(
-		&GlobalOption{
-			Out:    &bytes.Buffer{},
-			ErrOut: &bytes.Buffer{},
-		},
-	)
 	tests := []struct {
 		name          string
 		command       string
@@ -44,15 +37,15 @@ func Test_delCommand(t *testing.T) {
 		{
 			name:          "two args",
 			command:       "dev prod",
-			wantOutWriter: fmt.Sprintf("Error: accepts 1 arg(s), received 2\n%s%s", voidCmd.UsageString(), usageDelHelp),
-			wantErrWriter: "",
+			wantOutWriter: "",
+			wantErrWriter: "accepts 1 arg(s), received 2",
 			wantErr:       true,
 		},
 		{
 			name:          "no args",
 			command:       "",
-			wantOutWriter: fmt.Sprintf("Error: accepts 1 arg(s), received 0\n%s%s", voidCmd.UsageString(), usageDelHelp),
-			wantErrWriter: "",
+			wantOutWriter: "",
+			wantErrWriter: "accepts 1 arg(s), received 0",
 			wantErr:       true,
 		},
 	}
@@ -74,15 +67,19 @@ func Test_delCommand(t *testing.T) {
 				cmd.SetArgs(strings.Split(tt.command, " "))
 			}
 
-			if err := cmd.Execute(); (err != nil) != tt.wantErr {
+			err := cmd.Execute()
+			if (err != nil) != tt.wantErr {
 				t.Errorf("get() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if gotOutWriter := outWriter.String(); gotOutWriter != tt.wantOutWriter {
-				t.Errorf("get() = %v, want %v", gotOutWriter, tt.wantOutWriter)
-			}
-			if gotErrWriter := errWriter.String(); gotErrWriter != tt.wantErrWriter {
-				t.Errorf("get() = %v, want %v", gotErrWriter, tt.wantErrWriter)
+			if err != nil {
+				if err.Error() != tt.wantErrWriter {
+					t.Errorf("get() = %v, want %v", err.Error(), tt.wantErrWriter)
+				}
+			} else {
+				if gotOutWriter := outWriter.String(); gotOutWriter != tt.wantOutWriter {
+					t.Errorf("get() = %v, want %v", gotOutWriter, tt.wantOutWriter)
+				}
 			}
 		})
 	}

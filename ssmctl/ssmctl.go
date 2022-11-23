@@ -1,6 +1,8 @@
 package ssmctl
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -21,7 +23,7 @@ const (
 type SSMManager interface {
 	GetParameter(query string, withDecryption bool) (*Parameter, error)
 	DescribeParameters(query string, option string) ([]*Parameter, error)
-	PutParameter(key string, value string, isEncryption bool, isForce bool) error
+	PutParameter(key string, value string, isEncryption bool, kmsKeyId string, isForce bool) error
 	DeleteParameter(key string) error
 }
 
@@ -129,11 +131,14 @@ func (s *ssmManager) DescribeParameters(query string, option string) ([]*Paramet
 }
 
 // PutParameter puts a SSM parameter.
-func (s *ssmManager) PutParameter(key string, value string, isEncryption bool, isForce bool) error {
+func (s *ssmManager) PutParameter(key string, value string, isEncryption bool, kmsKeyId string, isForce bool) error {
 	var paramType string
 	if isEncryption {
 		paramType = "SecureString"
 	} else {
+		if kmsKeyId != "" {
+			return fmt.Errorf("KMS Key ID must be used with SecureString type.")
+		}
 		paramType = "String"
 	}
 
@@ -142,6 +147,10 @@ func (s *ssmManager) PutParameter(key string, value string, isEncryption bool, i
 		Value:     aws.String(value),
 		Type:      aws.String(paramType),
 		Overwrite: aws.Bool(isForce),
+	}
+
+	if kmsKeyId != "" {
+		param.KeyId = aws.String(kmsKeyId)
 	}
 
 	if _, err := s.svc.PutParameter(param); err != nil {
