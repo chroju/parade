@@ -73,8 +73,8 @@ func Test_keysCommand(t *testing.T) {
 		{
 			name:          "one arg for no match",
 			command:       "no_match",
-			wantOutWriter: fmt.Sprintf("Error: %s\nParameterNotFound\n%s\n\n", ErrMsgDescribeParameters, usageKeys),
-			wantErrWriter: "",
+			wantOutWriter: "",
+			wantErrWriter: fmt.Sprintf("%s\nParameterNotFound", ErrMsgDescribeParameters),
 			wantErr:       true,
 		},
 		{
@@ -103,15 +103,19 @@ func Test_keysCommand(t *testing.T) {
 				cmd.SetArgs(strings.Split(tt.command, " "))
 			}
 
-			if err := cmd.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("keys() error = %v, wantErr %v", err, tt.wantErr)
+			err := cmd.Execute()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("get() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if gotOutWriter := outWriter.String(); gotOutWriter != tt.wantOutWriter {
-				t.Errorf("keys() = %v, want %v", gotOutWriter, tt.wantOutWriter)
-			}
-			if gotErrWriter := errWriter.String(); gotErrWriter != tt.wantErrWriter {
-				t.Errorf("keys() = %v, want %v", gotErrWriter, tt.wantErrWriter)
+			if err != nil {
+				if err.Error() != tt.wantErrWriter {
+					t.Errorf("get() = %v, want %v", err.Error(), tt.wantErrWriter)
+				}
+			} else {
+				if gotOutWriter := outWriter.String(); gotOutWriter != tt.wantOutWriter {
+					t.Errorf("get() = %v, want %v", gotOutWriter, tt.wantOutWriter)
+				}
 			}
 		})
 	}
