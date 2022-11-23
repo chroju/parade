@@ -11,7 +11,7 @@ import (
 )
 
 // VERSION is cli tool version
-const VERSION = "0.3.2"
+const VERSION = "0.4.0"
 
 const (
 	// ErrMsgAWSProfileNotValid is an error message to notify aws profile is not valid
