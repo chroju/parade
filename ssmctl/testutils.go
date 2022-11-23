@@ -102,9 +102,6 @@ func (m *mockSSMClient) DescribeParameters(i *ssm.DescribeParametersInput) (*ssm
 		})
 	}
 
-	if len(result) == 0 {
-		return nil, errors.New(ssm.ErrCodeParameterNotFound)
-	}
 	return &ssm.DescribeParametersOutput{
 		Parameters: result,
 	}, nil

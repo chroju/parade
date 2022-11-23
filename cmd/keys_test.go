@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -74,8 +73,8 @@ func Test_keysCommand(t *testing.T) {
 			name:          "one arg for no match",
 			command:       "no_match",
 			wantOutWriter: "",
-			wantErrWriter: fmt.Sprintf("%s\nParameterNotFound", ErrMsgDescribeParameters),
-			wantErr:       true,
+			wantErrWriter: "",
+			wantErr:       false,
 		},
 		{
 			name:          "no args",

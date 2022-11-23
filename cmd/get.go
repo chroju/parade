@@ -70,15 +70,15 @@ func newGetCommand(globalOption *GlobalOption) *cobra.Command {
 func (o *getOption) get() error {
 	resp, err := o.SSMManager.DescribeParameters(o.Query, o.Option)
 	if err != nil {
-		if strings.Contains(err.Error(), "ParameterNotFound") {
-			return nil
-		}
 		return fmt.Errorf("%s\n%s", ErrMsgDescribeParameters, err)
 	}
 
 	if o.Option == ssmctl.DescribeOptionEquals {
 		resp, err := o.SSMManager.GetParameter(o.Query, o.IsDecryption)
 		if err != nil {
+			if strings.Contains(err.Error(), "ParameterNotFound") {
+				return nil
+			}
 			return err
 		}
 		fmt.Fprintln(o.Out, resp.Value)
