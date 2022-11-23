@@ -15,6 +15,7 @@ type setOption struct {
 	Key          string
 	Value        string
 	IsEncryption bool
+	KmsKeyId     string
 	IsForce      bool
 
 	SSMManager ssmctl.SSMManager
@@ -52,6 +53,7 @@ func newSetCommand(globalOption *GlobalOption) *cobra.Command {
 
 	cmd.PersistentFlags().BoolVarP(&o.IsEncryption, "encrypt", "e", false, "Encrypt the value and set it")
 	cmd.PersistentFlags().BoolVarP(&o.IsForce, "force", "f", false, "Force overwriting of existing values\nDefault, display a prompt to confirm that\nyou want to overwrite if the specified key already exists")
+	cmd.PersistentFlags().StringVarP(&o.KmsKeyId, "kms-key-id", "k", "", "KMS key ID to encrypt SecureString\nIf you don't specify a key ID,\nuses the default key associated with your AWS account")
 	cmd.SetOut(globalOption.Out)
 	cmd.SetErr(globalOption.ErrOut)
 
@@ -77,7 +79,7 @@ func (o *setOption) set() error {
 		}
 	}
 
-	if err := o.SSMManager.PutParameter(o.Key, o.Value, o.IsEncryption, o.IsForce); err != nil {
+	if err := o.SSMManager.PutParameter(o.Key, o.Value, o.IsEncryption, o.KmsKeyId, o.IsForce); err != nil {
 		return fmt.Errorf("%s\n%s", ErrMsgPutParameter, err)
 	}
 

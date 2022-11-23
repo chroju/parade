@@ -56,6 +56,20 @@ func Test_setCommand(t *testing.T) {
 			wantErr:       false,
 		},
 		{
+			name:          "two args encryption and specify KMS key ID",
+			command:       "/service1/dev/key3 value3 --encrypt --kms-key-id key",
+			wantOutWriter: "",
+			wantErrWriter: "",
+			wantErr:       false,
+		},
+		{
+			name:          "two args specify KMS key ID without encryption",
+			command:       "/service1/dev/key3 value3 --kms-key-id key",
+			wantOutWriter: "",
+			wantErrWriter: "Failed to execute PutParameter API.\nKMS Key ID must be used with SecureString type.",
+			wantErr:       true,
+		},
+		{
 			name:          "one arg",
 			command:       "/service1/dev/key1",
 			wantOutWriter: "",

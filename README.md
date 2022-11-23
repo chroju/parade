@@ -133,7 +133,9 @@ Overwrite `/service1/dev/key4` (value: value4) ? (Y/n)
 $ parade set /service1/dev/key4 value5 --force
 ```
 
-The value is stored as `String` type by default. It also supports `SecureString` type with the default AWS KMS key and can be specified with the `--encrypt` flag. `StringList` type is not supported.
+The value is stored as `String` type by default. It also supports `SecureString` with the `--encrypt` flag. If you don't specify a key ID with `--kms-key-id` flag, uses the default key associated with your AWS account.
+
+`StringList` type is not supported.
 
 
 ### del
