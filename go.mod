@@ -3,7 +3,7 @@ module github.com/chroju/parade
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go v1.44.144
+	github.com/aws/aws-sdk-go v1.44.170
 	github.com/fatih/color v1.13.0
 	github.com/spf13/cobra v1.6.1
 )
