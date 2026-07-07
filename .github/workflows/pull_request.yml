@@ -25,10 +25,6 @@ jobs:
           GO111MODULE: on
         run: |
           make test-coverage
-      - name: Install goveralls
-        env:
-          GO111MODULE: off
-        run: go get github.com/mattn/goveralls
       - name: Send coverage
         uses: shogo82148/actions-goveralls@9606dbc5ac5cf888a0e9ef901515c3cd516a2790 # v1.11.0
         with:
