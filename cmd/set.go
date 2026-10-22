@@ -63,7 +63,7 @@ func newSetCommand(globalOption *GlobalOption) *cobra.Command {
 func (o *setOption) set() error {
 	param, err := o.SSMManager.GetParameter(o.Key, false)
 	if err == nil && !o.IsForce {
-		fmt.Fprintf(o.ErrOut, color.YellowString(fmt.Sprintf("WARN: `%s` already exists.\n", o.Key)))
+		fmt.Fprint(o.ErrOut, color.YellowString(fmt.Sprintf("WARN: `%s` already exists.\n", o.Key)))
 		fmt.Fprintf(o.ErrOut, "Overwrite `%s` (value: %s) ? (Y/n)\n", o.Key, param.Value)
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
